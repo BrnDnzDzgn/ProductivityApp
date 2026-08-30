@@ -122,14 +122,8 @@ export default function App() {
   const total = totalForMode(mode);
   const progress = total > 0 ? 1 - seconds / total : 0;
 
-  // --- Ring geometry (responsive) ---
-  const [size, setSize] = useState(440);
-  useEffect(() => {
-    const update = () => setSize(Math.min(440, window.innerWidth - 48, window.innerHeight - 260));
-    update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
-  }, []);
+  // --- Ring geometry (fixed; scales only via CSS transform on small screens) ---
+  const size = 440;
   const stroke = 12;
   const r = (size - stroke) / 2;
   const circ = 2 * Math.PI * r;
@@ -154,8 +148,11 @@ export default function App() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
+        gap: 32,
+        padding: "40px 24px",
+        boxSizing: "border-box",
         position: "relative",
-        overflow: "hidden",
+        overflowX: "hidden",
         transition: "background 0.6s ease",
       }}
     >
@@ -184,7 +181,7 @@ export default function App() {
       </div>
 
       {/* round indicator */}
-      <div style={{ position: "relative", zIndex: 2, marginBottom: 28, display: "flex", gap: 8 }}>
+      <div style={{ position: "relative", zIndex: 2, display: "flex", gap: 8 }}>
         {Array.from({ length: rounds }).map((_, i) => (
           <div
             key={i}
@@ -199,8 +196,10 @@ export default function App() {
         ))}
       </div>
 
-      {/* ring + time */}
-      <div style={{ position: "relative", zIndex: 2, width: size, height: size }}>
+      {/* ring + time — fixed 440px, never rescales on resize */}
+      <div
+        style={{ position: "relative", zIndex: 2, width: size, height: size }}
+      >
         <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
           <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#1b1f2b" strokeWidth={stroke} />
           <circle
@@ -246,7 +245,7 @@ export default function App() {
       </div>
 
       {/* controls */}
-      <div style={{ position: "relative", zIndex: 2, display: "flex", gap: 12, marginTop: 40 }}>
+      <div style={{ position: "relative", zIndex: 2, display: "flex", gap: 12 }}>
         <button onClick={running ? pause : start} style={{ ...btnPrimary, background: accent }}>
           {running ? <Pause size={18} /> : <Play size={18} />}
           {running ? "Pause" : finished ? "Restart" : "Start"}
