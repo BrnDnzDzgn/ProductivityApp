@@ -100,13 +100,27 @@
 }
 
 .goal-title {
+  display: block;
+  width: 100%;
   margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
   font-size: var(--text-body);
   font-weight: 500;
   line-height: 1.4;
   color: var(--starlight);
+  text-align: left;
   overflow-wrap: anywhere;
+  cursor: text;
   transition: color var(--dur-mid) var(--ease-inout);
+}
+
+.goal-title:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--dust);
+  text-underline-offset: 4px;
 }
 
 .goal[data-done="true"] .goal-title {
@@ -177,15 +191,36 @@
   color: var(--aurora);
 }
 
-/* --- Delete confirmation ---------------------------------------------------
-   Irreversible, so it asks — but inline, because a modal for one row is a
-   bigger interruption than the action deserves. */
+/* --- Editing in place ------------------------------------------------------ */
 
-.goal-confirm {
+.goal-edit {
+  flex: 1;
+  min-width: 0;
   display: flex;
-  flex: 0 0 auto;
+  flex-direction: column;
+  gap: var(--s-8);
+}
+
+.goal-edit-title {
+  height: 40px;
+  padding: 0 var(--s-12);
+  text-align: left;
+}
+
+.goal-edit-row {
+  display: flex;
   align-items: center;
   gap: var(--s-12);
+}
+
+.goal-edit-target {
+  width: 72px;
+  height: 36px;
+  padding: 0 var(--s-8);
+}
+
+.goal-edit-unit {
+  margin-right: auto;
   font-size: var(--text-label);
   color: var(--moonlight);
 }
@@ -205,14 +240,47 @@
   color: var(--aurora);
 }
 
-.text-button--danger {
-  color: var(--flare);
+.text-button:disabled {
+  color: var(--comet);
+  cursor: not-allowed;
 }
 
-.text-button--danger:hover {
-  color: var(--flare);
-  text-decoration: underline;
-  text-underline-offset: 3px;
+/* --- Undo ------------------------------------------------------------------
+   Sticks to the bottom of the scrolling list, so it is reachable whether or not
+   the list has been scrolled. */
+
+.undo {
+  position: sticky;
+  bottom: var(--s-16);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--s-16);
+  /* Inset from the list, so that while the list is scrolled underneath it the
+     card's edge stays visible on both sides and the bar reads as floating above
+     rather than as a broken row. */
+  margin: var(--s-24) var(--s-8) 0;
+  padding: var(--s-12) var(--s-16);
+  border-radius: var(--r-button);
+  background: var(--dust);
+  animation: undo-in var(--dur-mid) var(--ease-out);
+}
+
+.undo-text {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--text-label);
+  color: var(--starlight);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@keyframes undo-in {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+  }
 }
 
 /* --- Empty state ----------------------------------------------------------- */

@@ -144,11 +144,18 @@
   background: var(--live-color, var(--aurora));
 }
 
-.strip-date {
+.strip-context {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-12);
   margin-left: auto;
   font-size: var(--text-label);
   color: var(--moonlight);
   white-space: nowrap;
+}
+
+.strip-count {
+  font-variant-numeric: tabular-nums;
 }
 
 /* `container-type: size` lets the timer's dial measure the room it actually
@@ -219,8 +226,9 @@
   }
 }
 
-@media (max-width: 420px) {
-  .strip-date {
+/* The count is the more useful of the two; the date goes first. */
+@media (max-width: 460px) {
+  .strip-day {
     display: none;
   }
 

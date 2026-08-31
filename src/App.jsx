@@ -4,6 +4,7 @@ import AppShell from "./shell/AppShell.jsx";
 import TimerTool from "./tools/Timer.jsx";
 import GoalsTool from "./tools/Goals.jsx";
 import { creditFocusSession } from "./lib/goals.js";
+import { countToday, recordSession, useSessions } from "./lib/sessions.js";
 import { navigate, useRoute } from "./lib/router.js";
 import { formatDuration, onFocusComplete, useTimerSession } from "./lib/timer.js";
 
@@ -15,11 +16,21 @@ const TOOLS = [
 export default function App() {
   const route = useRoute();
   const session = useTimerSession();
+  const sessions = useSessions();
 
   const tool = TOOLS.find((entry) => entry.id === route);
 
-  // A finished focus block is the event that connects the two tools.
-  useEffect(() => onFocusComplete(creditFocusSession), []);
+  // A finished focus block is the event everything else hangs off. Crediting
+  // reports which goal it landed on, so the log can name it even though the
+  // goal may retire itself in the same breath.
+  useEffect(
+    () =>
+      onFocusComplete(({ at, minutes }) => {
+        const goalId = creditFocusSession();
+        recordSession({ at, minutes, goalId });
+      }),
+    [],
+  );
 
   // An unknown hash shows the first tool; correct the address to match.
   useEffect(() => {
@@ -48,7 +59,12 @@ export default function App() {
   const Current = (tool ?? TOOLS[0]).Component;
 
   return (
-    <AppShell tools={TOOLS} activeId={(tool ?? TOOLS[0]).id} live={live}>
+    <AppShell
+      tools={TOOLS}
+      activeId={(tool ?? TOOLS[0]).id}
+      live={live}
+      sessionsToday={countToday(sessions)}
+    >
       <Current />
     </AppShell>
   );

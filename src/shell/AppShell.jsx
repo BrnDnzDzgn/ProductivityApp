@@ -8,7 +8,7 @@ const today = () =>
  * The frame every tool lives in. It knows the tool list, which one is showing,
  * and whether anything is running — nothing else. Tools stay ignorant of it.
  */
-export default function AppShell({ tools, activeId, live, children }) {
+export default function AppShell({ tools, activeId, live, sessionsToday = 0, children }) {
   const activeTool = tools.find((tool) => tool.id === activeId) ?? tools[0];
 
   return (
@@ -52,7 +52,14 @@ export default function AppShell({ tools, activeId, live, children }) {
             </button>
           )}
 
-          <p className="strip-date">{today()}</p>
+          <div className="strip-context">
+            {sessionsToday > 0 && (
+              <span className="strip-count">
+                {sessionsToday} {sessionsToday === 1 ? "session" : "sessions"} today
+              </span>
+            )}
+            <span className="strip-day">{today()}</span>
+          </div>
         </header>
 
         <main className="canvas">{children}</main>

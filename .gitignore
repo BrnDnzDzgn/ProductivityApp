@@ -27,5 +27,3 @@ dist-ssr
 .claude/
 .codex/
 .impeccable/
-
-*.md

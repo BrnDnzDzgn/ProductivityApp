@@ -10,15 +10,18 @@ const newId = () =>
     ? crypto.randomUUID()
     : `g${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
 
+const clampTarget = (value, fallback = 1) => {
+  const n = Math.round(Number(value));
+  if (!Number.isFinite(n) || n < 1) return fallback;
+  return Math.min(TARGET_RANGE[1], Math.max(TARGET_RANGE[0], n));
+};
+
 function sanitizeGoal(raw) {
   if (!raw || typeof raw !== "object") return null;
   const title = typeof raw.title === "string" ? raw.title.trim().slice(0, TITLE_MAX) : "";
   if (!title) return null;
 
-  const target = Math.min(
-    TARGET_RANGE[1],
-    Math.max(TARGET_RANGE[0], Math.round(Number(raw.target)) || 1),
-  );
+  const target = clampTarget(raw.target);
   const sessions = Math.max(0, Math.round(Number(raw.sessions)) || 0);
 
   return {
@@ -95,17 +98,49 @@ export function toggleGoalDone(id) {
  * number you set is the whole point, so it shouldn't need a second confirmation.
  */
 export function creditFocusSession() {
-  goalsStore.set((state) => {
-    if (!state.activeId) return state;
-    const target = state.items.find((g) => g.id === state.activeId);
-    if (!target || target.done) return state;
+  const state = goalsStore.get();
+  const goal = state.items.find((g) => g.id === state.activeId && !g.done);
+  if (!goal) return null;
 
-    const sessions = target.sessions + 1;
-    const done = sessions >= target.target;
-    return {
-      items: state.items.map((g) => (g.id === target.id ? { ...g, sessions, done } : g)),
-      activeId: done ? null : state.activeId,
-    };
+  const sessions = goal.sessions + 1;
+  const done = sessions >= goal.target;
+  goalsStore.set({
+    items: state.items.map((g) => (g.id === goal.id ? { ...g, sessions, done } : g)),
+    activeId: done ? null : state.activeId,
+  });
+  return goal.id;
+}
+
+export function updateGoal(id, { title, target }) {
+  goalsStore.set((state) => {
+    const items = state.items.map((goal) => {
+      if (goal.id !== id) return goal;
+
+      const nextTitle = typeof title === "string" ? title.trim().slice(0, TITLE_MAX) : goal.title;
+      if (!nextTitle) return goal;
+      const nextTarget = clampTarget(target, goal.target);
+
+      return {
+        ...goal,
+        title: nextTitle,
+        target: nextTarget,
+        // Lowering a target below what's already banked completes the goal, the
+        // same way finishing a session does. Raising one never reopens a goal —
+        // that would silently undo a completion the user marked by hand.
+        done: goal.done || goal.sessions >= nextTarget,
+      };
+    });
+    return { ...state, items };
+  });
+}
+
+/** Puts a deleted goal back where it was. Paired with the undo affordance. */
+export function restoreGoal(goal, index, wasActive) {
+  goalsStore.set((state) => {
+    if (state.items.some((g) => g.id === goal.id)) return state;
+    const items = [...state.items];
+    items.splice(Math.min(Math.max(index, 0), items.length), 0, goal);
+    return { items, activeId: wasActive && !goal.done ? goal.id : state.activeId };
   });
 }
 

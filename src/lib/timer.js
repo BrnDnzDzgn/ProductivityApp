@@ -57,25 +57,28 @@ function freshSession(settings) {
  */
 function project(session, settings, now) {
   if (!session.running || session.endsAt == null) {
-    return { session, crossed: 0, focusCompleted: 0, done: false };
+    return { session, crossed: 0, focusCompletedAt: [], done: false };
   }
 
   let { phase, round } = session;
   let endsAt = session.endsAt;
   let crossed = 0;
-  let focusCompleted = 0;
+  // The moments focus blocks actually ended, not the moment we noticed. A
+  // throttled tab can cross several at once, and the log should say when each
+  // one finished rather than stamping them all with the catch-up time.
+  const focusCompletedAt = [];
   const limit = 2 * RANGE.rounds[1] + 2; // guard against corrupt stored state
 
   while (endsAt <= now && crossed < limit) {
     if (phase === "focus") {
+      focusCompletedAt.push(endsAt);
       phase = "break";
       endsAt += phaseMs("break", settings);
-      focusCompleted += 1;
     } else if (round >= settings.rounds) {
       return {
         session: { phase, round, remaining: 0, endsAt: null, running: false, finished: true },
         crossed: crossed + 1,
-        focusCompleted,
+        focusCompletedAt,
         done: true,
       };
     } else {
@@ -89,7 +92,7 @@ function project(session, settings, now) {
   return {
     session: { ...session, phase, round, endsAt, remaining: Math.max(0, endsAt - now) },
     crossed,
-    focusCompleted,
+    focusCompletedAt,
     done: false,
   };
 }
@@ -145,7 +148,8 @@ sessionStore.checkpoint();
 
 // --- Completed focus phases -------------------------------------------------
 // The seam between the timer and everything that wants to know a focus block
-// finished. Goals credits a session here; a dashboard will want the same event.
+// finished. Listeners receive `{ at, minutes }`: goals credits the active goal,
+// the session log writes an entry, and a dashboard will want the same event.
 
 const focusCompleteListeners = new Set();
 
@@ -222,7 +226,8 @@ function tick() {
     return;
   }
 
-  const { session: next, crossed, focusCompleted, done } = project(prev, settingsStore.get(), now);
+  const settings = settingsStore.get();
+  const { session: next, crossed, focusCompletedAt, done } = project(prev, settings, now);
 
   if (crossed > 0) {
     // One chime for where we landed, even if a throttled tab meant we crossed
@@ -232,8 +237,8 @@ function tick() {
     else breakSound();
   }
 
-  for (let i = 0; i < focusCompleted; i += 1) {
-    for (const listener of focusCompleteListeners) listener();
+  for (const at of focusCompletedAt) {
+    for (const listener of focusCompleteListeners) listener({ at, minutes: settings.focusMin });
   }
 
   if (!next.running) stopClock();
