@@ -1,19 +1,148 @@
+/* ---------------------------------------------------------------------------
+   Orbit — design tokens
+   The single source of visual truth for every tool in the product. Values are
+   transcribed from DESIGN.md; change them here, never in a component.
+   --------------------------------------------------------------------------- */
+
 :root {
-  margin: 0;
-  padding: 0;
+  color-scheme: dark;
+
+  /* Surfaces — elevation is built with light, not shadow. */
+  --void: #0a0c12;        /* the page itself */
+  --deep-space: #0f1219;  /* the shell, the base canvas, recessed inputs */
+  --nebula: #161a24;      /* cards, panels, the resting content layer */
+  --horizon: #222735;     /* borders, dividers, hairlines, inactive tracks */
+  --dust: #2c3242;        /* popovers, menus, modals, hover fills */
+
+  /* Starlight — text and light. Never pure white. */
+  --starlight: #eef1f8;   /* primary text */
+  --moonlight: #a7aec0;   /* secondary text, labels, captions */
+  --comet: #6b7284;       /* tertiary text, placeholders, the quietest gray */
+
+  /* Accent — the one colour that points. */
+  --aurora: #7c9cff;
+  --aurora-deep: #5b78e0;
+
+  /* Functional — meaning only, never decoration. */
+  --meridian: #5fd3a0;    /* rest, done, completion */
+  --solar: #e8b366;       /* warning, attention */
+  --flare: #e8796b;       /* error, destructive, overdue */
+
+  /* Type */
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-ui: "Inter Tight", ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  --text-display-xl: 4.5rem;   /* 72 / 1.05  — hero, the timer's big number */
+  --text-display-l: 3rem;      /* 48 / 1.1   — page titles, brand surfaces */
+  --text-display-m: 2rem;      /* 32 / 1.15  — tool titles, section heads */
+  --text-title: 1.375rem;      /* 22 / 1.25  — card titles, panel headers */
+  --text-body-l: 1.0625rem;    /* 17 / 1.6   — reading text */
+  --text-body: 0.9375rem;      /* 15 / 1.55  — default UI text */
+  --text-label: 0.8125rem;     /* 13 / 1.4   — buttons, form labels, metadata */
+  --text-caption: 0.75rem;     /* 12 / 1.4   — timestamps, helper text */
+
+  /* Spacing — 4px base. Use the steps, don't freehand. */
+  --s-4: 4px;
+  --s-8: 8px;
+  --s-12: 12px;
+  --s-16: 16px;
+  --s-24: 24px;
+  --s-32: 32px;
+  --s-48: 48px;
+  --s-64: 64px;
+  --s-96: 96px;
+
+  /* Radii */
+  --r-input: 10px;
+  --r-button: 12px;
+  --r-card: 16px;
+
+  /* Motion — calm and physical. Never bounce, never elastic. */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-inout: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast: 160ms;   /* hover, press, toggle */
+  --dur-mid: 240ms;    /* state changes */
+  --dur-slow: 400ms;   /* opening a tool, a modal */
 }
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   margin: 0;
   padding: 0;
-  width: 100%;
-  min-height: 100vh;
+  min-height: 100%;
 }
 
 body {
-  background: #0d0f16;
+  background: var(--void);
+  color: var(--starlight);
+  font-family: var(--font-ui);
+  font-size: var(--text-body);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* --- Browser surfaces ------------------------------------------------------
+   The parts we don't draw still carry the design. Left at their defaults they
+   belong to no design system at all.
+   -------------------------------------------------------------------------- */
+
+::selection {
+  background: rgb(124 156 255 / 0.28);
+  color: var(--starlight);
+}
+
+::placeholder {
+  color: var(--comet);
+}
+
+input,
+textarea {
+  caret-color: var(--aurora);
+}
+
+:focus-visible {
+  outline: 2px solid var(--aurora);
+  outline-offset: 3px;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--horizon) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--horizon);
+  border: 2px solid var(--void);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--dust);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

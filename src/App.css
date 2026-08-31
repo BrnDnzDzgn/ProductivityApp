@@ -1,0 +1,340 @@
+/* ---------------------------------------------------------------------------
+   Orbit — focus timer
+   A product surface: dense, quiet, reactive motion only. Reads from the tokens
+   in index.css. `--phase` is set on .app from JS and carries the current
+   phase's functional colour to everything that expresses phase.
+   --------------------------------------------------------------------------- */
+
+.app {
+  /* One source of truth for the dial's size. The readout scales from it, so
+     type and ring can never disagree about how much room there is. */
+  --dial-size: max(220px, min(440px, 72vw, 54vh));
+
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-32);
+  padding: var(--s-64) var(--s-24) var(--s-48);
+}
+
+/* The one permitted glow, and only around a genuinely live element. It fades
+   in when the timer is actually running, which is the surface's only ambient
+   motion — and it stops the moment nothing is live. */
+.glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: -1;
+  width: min(980px, 150vw);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--phase) 0%, transparent 62%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 900ms var(--ease-out);
+}
+
+.glow[data-live="true"] {
+  opacity: 0.16;
+}
+
+/* --- Utilities (mute, settings) -------------------------------------------- */
+
+.utilities {
+  position: absolute;
+  top: var(--s-24);
+  right: var(--s-24);
+  display: flex;
+  gap: var(--s-4);
+}
+
+.icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: var(--r-input);
+  background: transparent;
+  color: var(--moonlight);
+  font: inherit;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-inout),
+    color var(--dur-fast) var(--ease-inout);
+}
+
+.icon-button:hover {
+  background: var(--nebula);
+  color: var(--starlight);
+}
+
+@media (pointer: coarse) {
+  .icon-button {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* --- Round progress --------------------------------------------------------
+   The glanceable read: how far through the set you are, legible from across a
+   room. The detail lives in the status line instead of being repeated here. */
+
+.rounds {
+  display: flex;
+  align-items: center;
+  gap: var(--s-8);
+  height: 12px;
+}
+
+.round-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--dust);
+  transition: background var(--dur-mid) var(--ease-inout),
+    width var(--dur-mid) var(--ease-inout),
+    height var(--dur-mid) var(--ease-inout);
+}
+
+.round-dot[data-state="done"] {
+  background: var(--comet);
+}
+
+.round-dot[data-state="current"] {
+  width: 12px;
+  height: 12px;
+  background: var(--phase);
+}
+
+/* --- The dial -------------------------------------------------------------- */
+
+.dial {
+  position: relative;
+  width: var(--dial-size);
+  aspect-ratio: 1;
+}
+
+.dial svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  rotate: -90deg;
+}
+
+.dial-track {
+  fill: none;
+  stroke: var(--horizon);
+  stroke-width: 12;
+}
+
+.dial-progress {
+  fill: none;
+  stroke: var(--phase);
+  stroke-width: 12;
+  stroke-linecap: round;
+  /* Linear and honest — the ring drains at real speed. */
+  transition: stroke-dashoffset 250ms linear, stroke var(--dur-slow) var(--ease-inout),
+    stroke-opacity var(--dur-mid) var(--ease-inout);
+}
+
+/* Below one stroke-width of arc there is nothing to draw but the round cap,
+   which reads as a stray dot floating above the ring. */
+.dial-progress[data-visible="false"] {
+  stroke-opacity: 0;
+}
+
+.dial-readout {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-12);
+}
+
+.time {
+  font-family: var(--font-display);
+  /* 72px at the dial's full 440px, proportional below it. */
+  font-size: calc(var(--dial-size) * 0.164);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.status {
+  margin: 0;
+  font-size: var(--text-label);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--moonlight);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Controls -------------------------------------------------------------- */
+
+.controls {
+  display: flex;
+  gap: var(--s-12);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-8);
+  min-height: 44px;
+  padding: 0 var(--s-24);
+  border: 1px solid transparent;
+  border-radius: var(--r-button);
+  font-family: inherit;
+  font-size: var(--text-body);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-inout),
+    border-color var(--dur-fast) var(--ease-inout),
+    color var(--dur-fast) var(--ease-inout);
+}
+
+.button:active {
+  translate: 0 1px;
+}
+
+.button--primary {
+  background: var(--aurora);
+  color: var(--void);
+}
+
+.button--primary:hover {
+  background: var(--aurora-deep);
+}
+
+.button--secondary {
+  background: transparent;
+  border-color: var(--horizon);
+  color: var(--starlight);
+}
+
+.button--secondary:hover {
+  background: var(--dust);
+}
+
+/* --- Settings -------------------------------------------------------------- */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s-24);
+  background: rgb(10 12 18 / 0.6);
+  animation: scrim-in var(--dur-mid) var(--ease-out);
+}
+
+.dialog {
+  width: 100%;
+  max-width: 360px;
+  padding: var(--s-32);
+  border-radius: var(--r-card);
+  background: var(--dust);
+  animation: dialog-in var(--dur-mid) var(--ease-out);
+}
+
+.dialog-title {
+  margin: 0 0 var(--s-24);
+  font-size: var(--text-title);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.dialog-note {
+  margin: var(--s-12) 0 0;
+  font-size: var(--text-caption);
+  line-height: 1.4;
+  color: var(--moonlight);
+}
+
+.dialog-done {
+  width: 100%;
+  margin-top: var(--s-32);
+}
+
+.field + .field {
+  margin-top: var(--s-24);
+}
+
+.field-label {
+  display: block;
+  margin-bottom: var(--s-8);
+  font-size: var(--text-label);
+  font-weight: 500;
+  color: var(--moonlight);
+}
+
+/* Inputs are holes you type into, not raised buttons. */
+.field-input {
+  width: 100%;
+  padding: var(--s-12);
+  border: 1px solid var(--horizon);
+  border-radius: var(--r-input);
+  background: var(--deep-space);
+  color: var(--starlight);
+  font-family: inherit;
+  font-size: 1rem; /* 16px keeps iOS from zooming on focus */
+  font-weight: 500;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  transition: border-color var(--dur-fast) var(--ease-inout),
+    box-shadow var(--dur-fast) var(--ease-inout);
+}
+
+.field-input:focus-visible {
+  outline: none;
+  border-color: var(--aurora);
+  box-shadow: 0 0 0 2px rgb(124 156 255 / 0.25);
+}
+
+.field-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@keyframes scrim-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+}
+
+/* A landscape phone has room for the dial or the controls, not both at desktop
+   proportions. Tighten everything rather than clipping the buttons away. */
+@media (max-height: 560px) {
+  .app {
+    --dial-size: max(150px, min(300px, 60vw, 46vh));
+    gap: var(--s-16);
+    padding: var(--s-24);
+  }
+
+  .utilities {
+    top: var(--s-12);
+    right: var(--s-12);
+  }
+}
