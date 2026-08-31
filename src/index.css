@@ -100,7 +100,7 @@ body {
 }
 
 ::placeholder {
-  color: var(--comet);
+  color: var(--moonlight);
 }
 
 input,

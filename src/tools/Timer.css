@@ -1,26 +1,29 @@
 /* ---------------------------------------------------------------------------
    Orbit — focus timer
    A product surface: dense, quiet, reactive motion only. Reads from the tokens
-   in index.css. `--phase` is set on .app from JS and carries the current
+   in index.css. `--phase` is set on .timer from JS and carries the current
    phase's functional colour to everything that expresses phase.
    --------------------------------------------------------------------------- */
 
-.app {
+.timer {
   /* One source of truth for the dial's size. The readout scales from it, so
-     type and ring can never disagree about how much room there is. */
-  --dial-size: max(220px, min(440px, 72vw, 54vh));
+     type and ring can never disagree about how much room there is. The vh line
+     is the fallback; where container queries exist the dial measures the canvas
+     it actually sits in rather than guessing at the shell's chrome. */
+  --dial-size: max(180px, min(440px, 70vw, 44vh));
+  --dial-size: max(180px, min(440px, 74cqw, 60cqh));
 
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  min-height: 100vh;
-  min-height: 100dvh;
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: var(--s-32);
-  padding: var(--s-64) var(--s-24) var(--s-48);
+  padding: var(--s-32) var(--s-24);
 }
 
 /* The one permitted glow, and only around a genuinely live element. It fades
@@ -49,8 +52,9 @@
 
 .utilities {
   position: absolute;
-  top: var(--s-24);
-  right: var(--s-24);
+  z-index: 1;
+  top: var(--s-16);
+  right: var(--s-16);
   display: flex;
   gap: var(--s-4);
 }
@@ -229,6 +233,33 @@
   background: var(--dust);
 }
 
+/* --- The goal this session counts toward --------------------------------- */
+
+.timer-goal {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--s-8);
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: var(--text-label);
+  color: var(--moonlight);
+  text-align: center;
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-inout);
+}
+
+.timer-goal:hover {
+  color: var(--starlight);
+}
+
+.timer-goal-count {
+  color: var(--moonlight);
+  font-variant-numeric: tabular-nums;
+}
+
 /* --- Settings -------------------------------------------------------------- */
 
 .scrim {
@@ -327,7 +358,7 @@
 /* A landscape phone has room for the dial or the controls, not both at desktop
    proportions. Tighten everything rather than clipping the buttons away. */
 @media (max-height: 560px) {
-  .app {
+  .timer {
     --dial-size: max(150px, min(300px, 60vw, 46vh));
     gap: var(--s-16);
     padding: var(--s-24);

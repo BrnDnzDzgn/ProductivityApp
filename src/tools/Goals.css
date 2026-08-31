@@ -1,0 +1,263 @@
+/* ---------------------------------------------------------------------------
+   Orbit — goals
+   A product surface in the Operate mode: a list you scan, act on, and leave.
+   Density and scanability over expression; the one accent points at whichever
+   goal the timer is currently counting toward.
+   --------------------------------------------------------------------------- */
+
+.goals {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--s-32) var(--s-24) var(--s-64);
+}
+
+.goals-column {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+/* --- Composer -------------------------------------------------------------- */
+
+.composer {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--s-8);
+}
+
+.composer-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.composer-field--target {
+  flex: 0 0 92px;
+}
+
+.composer .field-input {
+  height: 48px;
+  padding: 0 var(--s-12);
+  text-align: left;
+}
+
+.composer-add {
+  min-height: 48px;
+}
+
+.composer-field--target .field-input {
+  text-align: center;
+}
+
+.composer-add {
+  flex: 0 0 auto;
+}
+
+/* --- The list -------------------------------------------------------------- */
+
+.goal-list {
+  margin: var(--s-32) 0 0;
+  padding: 0 var(--s-24);
+  list-style: none;
+  background: var(--nebula);
+  border: 1px solid var(--horizon);
+  border-radius: var(--r-card);
+}
+
+.goal {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-16);
+  padding: var(--s-16) 0;
+}
+
+/* Hollow until the goal means something: filled Aurora while the timer counts
+   toward it, filled Meridian once it's done. */
+.goal-marker {
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  margin-top: 7px;
+  border: 1px solid var(--dust);
+  border-radius: 50%;
+  background: transparent;
+  transition: background var(--dur-mid) var(--ease-inout),
+    border-color var(--dur-mid) var(--ease-inout);
+}
+
+.goal[data-active="true"] .goal-marker {
+  background: var(--aurora);
+  border-color: var(--aurora);
+}
+
+.goal[data-done="true"] .goal-marker {
+  background: var(--meridian);
+  border-color: var(--meridian);
+}
+
+.goal-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.goal-title {
+  margin: 0;
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--starlight);
+  overflow-wrap: anywhere;
+  transition: color var(--dur-mid) var(--ease-inout);
+}
+
+.goal[data-done="true"] .goal-title {
+  color: var(--moonlight);
+}
+
+.goal-meta {
+  margin: var(--s-4) 0 0;
+  font-size: var(--text-caption);
+  line-height: 1.4;
+  color: var(--moonlight);
+  font-variant-numeric: tabular-nums;
+}
+
+.goal-track {
+  height: 2px;
+  margin-top: var(--s-12);
+  border-radius: 999px;
+  background: var(--horizon);
+  overflow: hidden;
+}
+
+.goal-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--aurora);
+  transition: width var(--dur-slow) var(--ease-out), background var(--dur-mid) var(--ease-inout);
+}
+
+.goal[data-done="true"] .goal-fill {
+  background: var(--meridian);
+}
+
+/* --- Row actions ----------------------------------------------------------- */
+
+.goal-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: var(--s-4);
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-inout);
+}
+
+.goal:hover .goal-actions,
+.goal:focus-within .goal-actions {
+  opacity: 1;
+}
+
+/* Nothing hovers on a touch screen. */
+@media (pointer: coarse) {
+  .goal-actions {
+    opacity: 1;
+  }
+}
+
+.icon-button--small {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--s-8);
+}
+
+.icon-button--danger:hover {
+  background: var(--nebula);
+  color: var(--flare);
+}
+
+.goal[data-active="true"] .icon-button--active {
+  color: var(--aurora);
+}
+
+/* --- Delete confirmation ---------------------------------------------------
+   Irreversible, so it asks — but inline, because a modal for one row is a
+   bigger interruption than the action deserves. */
+
+.goal-confirm {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--s-12);
+  font-size: var(--text-label);
+  color: var(--moonlight);
+}
+
+.text-button {
+  padding: var(--s-4) 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-weight: 500;
+  color: var(--starlight);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-inout);
+}
+
+.text-button:hover {
+  color: var(--aurora);
+}
+
+.text-button--danger {
+  color: var(--flare);
+}
+
+.text-button--danger:hover {
+  color: var(--flare);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* --- Empty state ----------------------------------------------------------- */
+
+.goals-empty {
+  margin: var(--s-48) 0 0;
+  max-width: 44ch;
+}
+
+.goals-empty-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-display-m);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  color: var(--starlight);
+}
+
+.goals-empty-body {
+  margin: var(--s-16) 0 0;
+  font-size: var(--text-body-l);
+  line-height: 1.6;
+  color: var(--moonlight);
+}
+
+@media (max-width: 560px) {
+  .composer {
+    flex-wrap: wrap;
+  }
+
+  .composer-field {
+    flex: 1 0 100%;
+  }
+
+  .composer-field--target {
+    flex: 0 0 92px;
+  }
+
+  .composer-add {
+    flex: 1;
+  }
+
+  .goal-list {
+    padding: 0 var(--s-16);
+  }
+}
