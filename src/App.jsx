@@ -1,33 +1,52 @@
 import { useEffect } from "react";
-import { Target, Timer as TimerIcon } from "lucide-react";
+import {
+  Activity as ActivityIcon,
+  CalendarDays,
+  Footprints,
+  Repeat,
+  Target,
+  Timer as TimerIcon,
+} from "lucide-react";
 import AppShell from "./shell/AppShell.jsx";
 import TimerTool from "./tools/Timer.jsx";
+import DailiesTool from "./tools/Dailies.jsx";
 import GoalsTool from "./tools/Goals.jsx";
-import { creditFocusSession } from "./lib/goals.js";
+import CalendarTool from "./tools/Calendar.jsx";
+import HabitsTool from "./tools/Habits.jsx";
+import ActivityTool from "./tools/Activity.jsx";
+import { dailyForSession } from "./lib/dailies.js";
 import { countToday, recordSession, useSessions } from "./lib/sessions.js";
+import { useToday } from "./lib/today.js";
 import { navigate, useRoute } from "./lib/router.js";
 import { formatDuration, onFocusComplete, useTimerSession } from "./lib/timer.js";
 
 const TOOLS = [
   { id: "timer", label: "Timer", icon: TimerIcon, Component: TimerTool },
+  { id: "dailies", label: "Dailies", icon: Repeat, Component: DailiesTool },
+  // Goals sits beside Dailies because they are the two tools you write
+  // intentions into; Calendar and Activity read them back.
   { id: "goals", label: "Goals", icon: Target, Component: GoalsTool },
+  { id: "calendar", label: "Calendar", icon: CalendarDays, Component: CalendarTool },
+  { id: "habits", label: "Habits", icon: Footprints, Component: HabitsTool },
+  { id: "activity", label: "Activity", icon: ActivityIcon, Component: ActivityTool },
 ];
 
 export default function App() {
   const route = useRoute();
   const session = useTimerSession();
   const sessions = useSessions();
+  const today = useToday();
 
   const tool = TOOLS.find((entry) => entry.id === route);
 
-  // A finished focus block is the event everything else hangs off. Crediting
-  // reports which goal it landed on, so the log can name it even though the
-  // goal may retire itself in the same breath.
+  // A finished focus block is the event everything else hangs off. The log
+  // entry is the whole record: it names the daily the block counted toward — or
+  // nothing, when the active daily doesn't repeat on the day it finished — and
+  // every notion of a daily being "done today" is counted back out of it.
   useEffect(
     () =>
       onFocusComplete(({ at, minutes }) => {
-        const goalId = creditFocusSession();
-        recordSession({ at, minutes, goalId });
+        recordSession({ at, minutes, dailyId: dailyForSession(at) });
       }),
     [],
   );
@@ -63,7 +82,7 @@ export default function App() {
       tools={TOOLS}
       activeId={(tool ?? TOOLS[0]).id}
       live={live}
-      sessionsToday={countToday(sessions)}
+      sessionsToday={countToday(sessions, today)}
     >
       <Current />
     </AppShell>
