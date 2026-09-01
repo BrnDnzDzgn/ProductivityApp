@@ -1,0 +1,195 @@
+/* ---------------------------------------------------------------------------
+   Orbit — activity
+   A review surface, deliberately narrow: it answers "am I actually doing the
+   work" and nothing else. No metric it reports rewards opening it more often.
+   --------------------------------------------------------------------------- */
+
+.activity {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--s-32) var(--s-24) var(--s-64);
+}
+
+.activity-column {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+/* --- The summary, written as language rather than a grid of stat tiles ----- */
+
+.activity-headline {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-display-m);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  color: var(--starlight);
+}
+
+.activity-support {
+  margin: var(--s-12) 0 0;
+  font-size: var(--text-body-l);
+  line-height: 1.6;
+  color: var(--moonlight);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Four weeks of days ---------------------------------------------------- */
+
+.activity-chart {
+  margin-top: var(--s-48);
+}
+
+/* The bars carry shape — whether the habit is holding — so the scale is stated
+   once in words rather than drawn as gridlines. */
+.activity-scale {
+  margin: 0 0 var(--s-8);
+  font-size: var(--text-caption);
+  color: var(--moonlight);
+  text-align: right;
+}
+
+.activity-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 132px;
+}
+
+.activity-day {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: flex-end;
+  height: 100%;
+}
+
+.activity-bar {
+  width: 100%;
+  min-height: 2px;
+  border-radius: 2px;
+  background: var(--aurora);
+}
+
+/* A day with no focus still draws its baseline, so the gaps read as days you
+   didn't work rather than as missing data. */
+.activity-day[data-worked="false"] .activity-bar {
+  background: var(--horizon);
+}
+
+.activity-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--s-12);
+  font-size: var(--text-caption);
+  color: var(--moonlight);
+}
+
+/* --- Dailies in flight ------------------------------------------------------- */
+
+.activity-section {
+  margin-top: var(--s-48);
+}
+
+.activity-heading {
+  margin: 0 0 var(--s-16);
+  font-size: var(--text-title);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--starlight);
+}
+
+.activity-dailies {
+  margin: 0;
+  padding: 0 var(--s-24);
+  list-style: none;
+  background: var(--nebula);
+  border: 1px solid var(--horizon);
+  border-radius: var(--r-card);
+}
+
+.activity-daily {
+  display: block;
+  width: 100%;
+  padding: var(--s-16) 0;
+  border: none;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.activity-daily-title {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-8);
+  font-size: var(--text-body);
+  font-weight: 500;
+  color: var(--starlight);
+  overflow-wrap: anywhere;
+}
+
+.activity-daily:hover .activity-daily-title {
+  text-decoration: underline;
+  text-decoration-color: var(--dust);
+  text-underline-offset: 4px;
+}
+
+.activity-daily-count {
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-size: var(--text-label);
+  font-weight: 400;
+  color: var(--moonlight);
+  font-variant-numeric: tabular-nums;
+}
+
+.activity-daily-track {
+  display: block;
+  height: 2px;
+  margin-top: var(--s-12);
+  border-radius: 999px;
+  background: var(--horizon);
+  overflow: hidden;
+}
+
+.activity-daily-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--aurora);
+}
+
+.activity-daily[data-active="false"] .activity-daily-fill {
+  background: var(--comet);
+}
+
+.activity-empty-note {
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: 1.6;
+  color: var(--moonlight);
+}
+
+/* --- Nothing logged yet ---------------------------------------------------- */
+
+.activity-empty {
+  max-width: 44ch;
+}
+
+.activity-empty-body {
+  margin: var(--s-16) 0 0;
+  font-size: var(--text-body-l);
+  line-height: 1.6;
+  color: var(--moonlight);
+}
+
+@media (max-width: 560px) {
+  .activity-bars {
+    height: 104px;
+    gap: 2px;
+  }
+}
