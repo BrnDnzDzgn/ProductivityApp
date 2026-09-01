@@ -1,6 +1,6 @@
 # DESIGN.md — Orbit
 
-> A personal-growth workspace: a home for the tools you use to become who you're trying to be. Pomodoro, goals, calendar, skills, and more, living together under one calm night sky.
+> A personal-growth workspace: a home for the tools you use to become who you're trying to be. Dailies, goals, calendar, habits, and notes, living together under one calm night sky.
 
 This document is the single source of truth for how the product looks and feels. Every tool and every page reads from it so the whole thing feels like one place, not five apps stapled together. When you ask an AI agent to build or change a surface, point it here first.
 
@@ -50,7 +50,7 @@ The palette is mostly a grayscale of blue-tinted darks and starlight lights, wit
 |---|---|---|
 | Starlight | `#EEF1F8` | Primary text and the brand "white." Warm-cool off-white, never `#FFF`. |
 | Moonlight | `#A7AEC0` | Secondary text, labels, captions. |
-| Comet | `#6B7284` | Tertiary text, placeholders, timestamps, the quietest readable gray. |
+| Comet | `#7A8296` | Tertiary text, placeholders, timestamps, the quietest readable gray. Darkened from the original `#6B7284` to clear WCAG AA (4.5:1) on all dark surfaces. |
 
 ### Accent — used sparingly
 
@@ -233,7 +233,7 @@ Calm and physical. Motion exists to show change, not to entertain.
 ```
 Backgrounds:  Void #0A0C12 · Deep Space #0F1219 · Nebula #161A24
 Edges/tints:  Horizon #222735 · Dust #2C3242
-Text:         Starlight #EEF1F8 · Moonlight #A7AEC0 · Comet #6B7284
+Text:         Starlight #EEF1F8 · Moonlight #A7AEC0 · Comet #7A8296
 Accent:       Aurora #7C9CFF · Aurora Deep #5B78E0
 Functional:   Meridian #5FD3A0 (rest/done) · Solar #E8B366 (focus/warn) · Flare #E8796B (error)
 Type:         Space Grotesk (display) · Inter Tight (body/UI) · JetBrains Mono (data only)
@@ -246,3 +246,148 @@ Type:         Space Grotesk (display) · Inter Tight (body/UI) · JetBrains Mono
 
 **The one-line brief, if an agent reads nothing else:**
 > Standing under a clear night sky: deep blue-black surfaces, starlight-white text, one cool periwinkle accent for the thing that matters. Space Grotesk for the big moments, Inter Tight for everything you actually use. Calm, quiet, dense where it's a tool and open where it's a pitch. The dark is the stage; the light is the point.
+
+---
+
+## 11. Tool specifications
+
+The product's tools and the model they share. This section is the source of truth for *what each tool is*; sections 1–10 govern *how it looks*. All tools are product surfaces (section 0) unless noted. Build order follows Principle 5 — one tool fully before the next — in the sequence listed here.
+
+### The shared model
+
+A few concepts are common across tools. Defining them once keeps the tools coherent (Principle 1).
+
+**Daily** — a recurring intention measured in focus sessions. Has: a title, a **target number of sessions per scheduled day**, a **recurrence** (every day, or specific weekdays), a **color** (from the Daily palette below), and an optional **parent goal**.
+
+The target is per day, and it resets. "Two sessions of piano, every Mon/Wed/Fri" asks for two on each of those days; the next scheduled day starts at zero regardless of what happened on the last one. Completing a focus block credits the active daily; a daily is done for a day once that day's sessions reach its target, and it is done *for that day only*. There is no backfilling a missed past day, because honest history matters more than a tidy grid (Principle 4).
+
+**Completion is counted, not stored.** It comes out of the session log, which already records when every focus block finished and which daily it counted toward. A `done` flag beside that would be a second copy of the same fact, free to drift from it.
+
+The one exception is work done **away from the timer** — you meditate, you read before bed, and the log cannot know. So a daily can also be **marked done by hand for today**. That mark is the only thing about a daily's completion that is recorded, and it is recorded because nothing else in the product knows it: it is additional information, not a duplicate. It is a per-day boolean and nothing more — no counts, no partial credit, gone tomorrow. It is emphatically not the old lifetime `done` flag returning; that one was permanent and retired the record.
+
+Marking follows the same rule as everything else here: **today only.** A day that has passed cannot be marked, and cannot be unmarked either — withdrawing a claim after the day is over is editing history just as much as adding one.
+
+Which of the two finished a day is kept, because the calendar draws the difference and a streak resting on hand marks alone ought to be visible as one.
+
+*This supersedes the lifetime model inherited from the old Goals tool* (2026-08-31), where `target` was a total to bank toward across all time and `done` was a permanent, hand-settable flag that retired the record. Lifetime targets with sessions banked toward them are goals, not dailies. Existing records are migrated rather than reinterpreted: the per-day target resets to 1 and everything the old record claimed is preserved inert alongside it, since reading "20 sessions in total" as "20 sessions every day" would leave an intention that can never be met again.
+
+Formerly called "Goals"; renamed to **Dailies** so the word "goal" can mean the longer-horizon thing below.
+
+**Goal** — a weekly or monthly intention, checked off **by hand**. A goal is a container: dailies can nest under a weekly goal, and weekly goals under a monthly goal. Progress of children is *shown* but never auto-completes the parent — the person decides when a goal is done. Goals are not measured in sessions; they're measured in judgment. The tool's job is to make that judgment informed, not to nag.
+
+**Habit** — not a thing you create. A habit is the streak-and-consistency *view* of a daily that recurs. The Habits tool is read-only: it reflects the recurring dailies you already have. You change your habits by changing your dailies, not by editing a habit list.
+
+**Session log** — the existing append-only record (see PRODUCT.md). Everything above reads from it. Unchanged.
+
+### The Daily color palette
+
+Dailies carry a color so the calendar can show, at a glance, *which* intentions a day held. With many dailies, a free color picker would turn the calendar into confetti and break "no rainbow data viz" (section 7). So dailies choose from a **fixed set of eight muted, night-sky-compatible hues** — each legible as a small dot on Void, none fighting Aurora for attention:
+
+```
+Periwinkle  #7C9CFF   (= Aurora; the default)
+Seafoam     #5FD3A0   (= Meridian)
+Amber       #E8B366   (= Solar)
+Coral       #E8796B   (= Flare)
+Lilac       #A98BE0
+Sky         #6BB6D6
+Sage        #9DC183
+Rose        #D98BA6
+```
+
+These are deliberately desaturated and equal in weight — no single one dominates. The person picks one per daily; if they don't, it defaults to Periwinkle. Chart and dot fills come only from this set.
+
+### Tool: Dailies  *(build first — rename + recurrence)*
+
+The renamed, extended version of today's Goals tool. Everything the current tool does, plus:
+- A **recurrence** control on create/edit: "every day" or a weekday picker (S M T W T F S as toggle chips, Aurora when on).
+- A **color** swatch picker from the eight-hue palette.
+- A **per-day target**: how many sessions this daily asks for on each day it repeats. Labelled as such, and small — a double-digit daily target is an implausible day.
+- An optional **parent goal** selector (populated once the Goals tool exists; absent until then).
+- The list groups by "today's dailies" (those recurring today, front and center) and "all dailies" below. Only today's count toward the timer and can be completed today.
+- Today's progress bar empties again tomorrow — it shows the day, not a lifetime.
+- Keep the nine-second undo on delete and the teaching empty state.
+- A check control for today only, for work done away from the timer. It appears while today is unfinished and withdraws once the sessions themselves finish it — there is nothing to unmark then, because the mark is not what is holding it up. The row says which happened ("Marked done today" vs "Done today · 2 sessions") rather than flattening them.
+- The old hand-settable lifetime "done" and the target-below-banked rule went with the lifetime model; this replaces neither.
+- A daily carried over from that model shows a quiet note saying what it used to claim, until the person resolves it by editing the daily.
+
+Visually: Nebula cards on the Deep Space canvas, one primary action (add a daily) in Aurora, the color swatch as the only other color per row, recurrence shown as a quiet Moonlight line ("every day", "Mon · Wed · Fri"). Left-aligned, dense, calm.
+
+### Tool: Calendar  *(build after Dailies)*
+
+One large month view; the current month by default; today clearly marked (an Aurora ring on the date number, not a filled cell — the day is *indicated*, not *shouted*). Month navigation is quiet arrows; a "today" affordance returns from wherever you've browsed to.
+
+Each day cell shows a small row of **colored dots**, one per daily that day holds something for — a focus session credited to it, a hand mark, or both — in that daily's color. The color is the identity; the **ink is the outcome**:
+
+| Mark | Meaning |
+|---|---|
+| **solid** ● | the day's target was met in logged sessions |
+| **donut** ◉ | complete, but the hand mark is what got it there |
+| **ring** ○ | worked, not finished |
+| nothing | nothing |
+
+More ink means more done, in that order. Solid-versus-donut is a close-up distinction, not a glance one: at month scale both read as "done", which is the honest headline — you did meditate. The provenance is there when you look, stated plainly in words in the hover label and the day panel ("marked done"), never with anything that scolds.
+
+Dots are built from the **union** of the log and the hand marks, never the log alone — a daily finished off-timer would otherwise leave its day looking untouched, the exact failure this section's honesty rule exists to prevent. Hovering (or tapping, on touch) a dot names the daily and how the day went ("Piano · 1 of 2", "Meditate · marked done"). A day with nothing completed is not empty-looking-broken — it draws its baseline quietly, so gaps read as days-not-worked, not as missing data (the Activity tool's honesty principle, applied here).
+
+The calendar is a *reader*, not a scheduler: it visualizes the session log and daily completions. It does not let you create or complete things directly (that's the Dailies tool's job) — clicking a day can reveal what happened that day, but the calendar never becomes an input surface. This keeps the shell's tools single-purpose.
+
+Responsive: the month grid becomes a vertical agenda list on mobile (section 9) — each day a row, its dots inline — rather than a squished 7-column grid.
+
+### Tool: Goals  *(build after Calendar)*
+
+The longer-horizon tool. Two sections, **This week** and **This month**, each a list of hand-checked goals. Creating a goal: a title, a horizon (weekly/monthly), and optional children.
+
+Nesting is the heart of it. A weekly goal can hold dailies; a monthly goal can hold weekly goals. Under each goal, its children are listed with their own state, and a quiet progress line summarizes them ("3 of 5 done" in Moonlight, never a loud progress bar demanding completion). Checking the parent is always a deliberate hand action — Aurora check control — and is never triggered automatically by the children, nor blocked by them (you can call a goal done with children unfinished; that's your call).
+
+Editing a daily from here is allowed — the Goals tool can open a daily's edit inline — so the person doesn't have to bounce to the Dailies tool to re-parent or adjust. Dailies still *live* in the Dailies tool; Goals just gets a window into them.
+
+An unfinished goal at week/month end doesn't scold. It stays until the person resolves it (checks it, deletes it, or carries it forward) — no automatic archiving, no red overdue state unless the person set a hard date. Calm over pressure (Principle 3).
+
+**As built** (2026-08-31), four decisions the spec above left open:
+
+- **"This week" and "This month" are horizons, not date windows.** A goal written three weeks ago and never checked still sits under "This week". This is what "it stays until the person resolves it" requires: filtering by date would be the automatic archiving the paragraph above forbids, wearing a different hat.
+- **No due dates, so nothing is ever red.** The "unless the person set a hard date" clause describes a feature that does not exist, so the overdue state it licenses cannot occur. If hard dates ever ship, that is where Flare would be earned.
+- **A weekly goal's progress line counts today**, because its children are dailies and a daily is only ever done for a day. It counts only the children today actually asks for — a daily that doesn't recur today is owed nothing and stays out of the denominator rather than being counted as a miss. With none scheduled, the line reads "Nothing scheduled today". A monthly goal's line counts the plain `done` of the weekly goals under it.
+- **A goal's horizon is fixed once created.** Changing it would strand children pointing at a parent that can no longer hold them, and silently orphaning someone's structure is worse than asking them to make a new goal.
+
+### Tool: Habits  *(build after Goals)*
+
+A read-only reflection of the recurring dailies. For each recurring daily: its name, its recurrence, its current streak, and a compact consistency strip (the last several weeks as a row of marks — filled in the daily's color on days it was completed, faint Horizon on scheduled-but-missed, nothing on days it wasn't scheduled). No create, no edit, no delete — a line of Moonlight copy explains that habits come from recurring dailies and links to the Dailies tool.
+
+**As built** (2026-08-31), two things the spec above left open:
+
+- **A fourth mark state.** Today, scheduled, not yet done is neither *done* nor *missed*: it is **open**, drawn hollow. Drawing it faint like a miss would have the strip contradict the run counted at the end of the same row, since an unfinished today never ends a run. Days before the daily was created draw as nothing, for the same reason the streak walk stops there — an intention cannot have been missed before it was written down.
+- **The window is four weeks**, the same span the Activity chart covers, so both reflection surfaces answer "the last four weeks" rather than each picking their own idea of recent.
+
+The streak rule, stated once: walking back from today, an unscheduled day is skipped entirely — neither a hit nor a miss, because nothing was asked for. A scheduled day that is **over** and carries no completion ends the run. An unfinished **today** is skipped rather than counted against you. This is the same rule the Activity tool follows when it steps past an empty today before counting a streak.
+
+The point is a single honest answer to "which of my intentions am I actually keeping." It rewards nothing by being opened more often (Principle 2) — it's a mirror, not a scoreboard.
+
+### Tool: Notes  *(build last — largest, most independent)*
+
+A Notion-like hierarchical writing space. Structure, three levels the person can extend:
+- **Notebooks** — the top level, shown first when the tool opens (think shelves).
+- **Pages** — live inside notebooks, and inside other pages: a page can hold **sub-pages to arbitrary depth**. A left tree (collapsible) navigates the hierarchy; the current page fills the canvas.
+- Everything — notebook names, page titles, sub-page titles — is **renameable inline**.
+
+The editor is genuine rich text: **headings (a couple of levels), paragraphs, and bullet lists** at minimum, entered fluidly (a clean toolbar or markdown-style shortcuts, whichever reads calmer). Create a new note, a new sub-page under any page, save, and reopen — all frictionless. Ease of use is a stated requirement: creating and moving between notes should feel weightless.
+
+**Honesty constraint (important):** like every Orbit tool, Notes persists to `localStorage` only — per-browser and losable (Principle 4, hard constraints in PRODUCT.md). Notes is the tool where that hurts most, because people trust a notes app with things they don't want to lose. So Notes **must** carry a plain, visible affordance to **export** (download all notes as a file — Markdown or JSON) and ideally **import** it back. The design states the local-only nature quietly but clearly rather than implying cloud durability it can't provide. This isn't optional polish; it's the tool being honest about what it is.
+
+Visually Notes leans slightly toward the calmer, more spacious end of the product lane — it's a reading and writing surface, so its measure stays within ~70 characters (section 9), its type is comfortable (Body L for note content), and its chrome is minimal. Still product, not brand: no performance, just a quiet place to write. The tree, the page, and the editor are all Deep Space / Nebula surfaces with Horizon dividers; Aurora marks only the current page in the tree and the single primary "new" action.
+
+### Cut: Skills
+
+Considered and cut (2026-08-31). A hand-maintained list of "skills I have" is a static inventory that doesn't connect to the practice — it rewards no real progress and risks becoming dead weight (Principle 2). If a sense of "what am I getting better at" is wanted later, it should *emerge* from where focus was actually spent (goals and dailies invested in over time), not from a list the person curates. Not on the roadmap.
+
+### Roadmap summary
+
+| Order | Tool | Nature | Depends on |
+|---|---|---|---|
+| 1 | **Dailies** | Rename of Goals + recurrence + color + parent slot | — |
+| 2 | **Calendar** | Read-only month view of completed dailies | Dailies (recurrence, color) |
+| 3 | **Goals** | Weekly/monthly, hand-checked, nesting | Dailies (for children) |
+| 4 | **Habits** | Read-only streak view of recurring dailies | Dailies (recurrence) |
+| 5 | **Notes** | Notion-like hierarchy + rich text + export | — (independent) |
+
+Existing tools — Timer, Activity, the shell, the session log — are unchanged except that Dailies replaces Goals in the rail and anywhere "goal" was shown for the session-counting thing.
