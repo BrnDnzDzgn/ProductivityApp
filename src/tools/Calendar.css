@@ -1,0 +1,443 @@
+/* ---------------------------------------------------------------------------
+   Orbit — calendar
+   A reader. One month at a time, drawn as quietly as a month can be drawn: no
+   gridlines, no filled cells, no chrome. The date numbers hold the columns and
+   the dots carry the only colour, each one a daily wearing its own hue.
+   --------------------------------------------------------------------------- */
+
+.calendar {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--s-32) var(--s-24) var(--s-64);
+}
+
+.calendar-column {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+/* --- Month heading and navigation ------------------------------------------ */
+
+.cal-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-16);
+  margin-bottom: var(--s-24);
+}
+
+.cal-head-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.cal-month {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-display-m);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--starlight);
+}
+
+.cal-totals {
+  margin: var(--s-4) 0 0;
+  font-size: var(--text-body);
+  line-height: 1.5;
+  color: var(--moonlight);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Quiet arrows, per the brief: the month name is the heading, not these. */
+.cal-nav {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--s-4);
+  margin-top: var(--s-4);
+}
+
+.cal-nav .text-button {
+  margin-right: var(--s-8);
+  font-size: var(--text-label);
+}
+
+/* --- The grid -------------------------------------------------------------- */
+
+.cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--s-4);
+  padding: 0 var(--s-12);
+  margin-bottom: var(--s-8);
+}
+
+.cal-weekday {
+  padding: 0 var(--s-8);
+  font-size: var(--text-caption);
+  color: var(--moonlight);
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--s-4);
+  padding: var(--s-12);
+  background: var(--nebula);
+  border: 1px solid var(--horizon);
+  border-radius: var(--r-card);
+}
+
+.cal-pad {
+  min-height: 84px;
+}
+
+.cal-day {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-8);
+  min-height: 84px;
+  padding: var(--s-8);
+  border: none;
+  border-radius: var(--r-input);
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-inout);
+}
+
+.cal-day:hover {
+  background: var(--dust);
+}
+
+.cal-day[aria-pressed="true"] {
+  background: var(--dust);
+}
+
+/* The date is indicated, never shouted: a ring around the number, not a filled
+   cell. The circle is always there and always the same size, so today's ring
+   changes only its colour and nothing shifts. */
+.cal-date {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-size: var(--text-label);
+  color: var(--moonlight);
+  font-variant-numeric: tabular-nums;
+}
+
+.cal-day[data-worked="true"] .cal-date {
+  color: var(--starlight);
+}
+
+.cal-day[data-today="true"] .cal-date {
+  box-shadow: inset 0 0 0 1.5px var(--aurora);
+  color: var(--starlight);
+  font-weight: 500;
+}
+
+/* The weekday belongs to the agenda row on mobile; on the grid the column
+   header above already says it. */
+.cal-weekday-inline {
+  display: none;
+}
+
+/* --- Dots ------------------------------------------------------------------
+   One dot per daily that took a session that day, in that daily's colour. The
+   only colour on the surface, and it comes from the eight-hue Daily palette. */
+
+.cal-dots {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-4);
+  min-height: 8px;
+}
+
+.cal-dot {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-8);
+}
+
+/* The colour is the identity; the ink is the outcome.
+
+     solid   the day's target was met in logged sessions
+     donut   complete, but the manual mark is what got it there
+     ring    worked, not finished
+
+   More ink means more done, in that order. Drawn with a border rather than an
+   inset shadow so the hole shows whatever the cell is sitting on — Nebula at
+   rest, Dust on hover — instead of a painted-on colour that misses by a shade. */
+.cal-dot-mark {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--dot);
+}
+
+.cal-dot[data-state="manual"] .cal-dot-mark,
+.cal-dot-mark[data-state="manual"] {
+  background: transparent;
+  border: 3px solid var(--dot);
+}
+
+.cal-dot[data-state="partial"] .cal-dot-mark,
+.cal-dot-mark[data-state="partial"] {
+  background: transparent;
+  border: 1.5px solid var(--dot);
+}
+
+/* Sessions with no daily behind them — finished with nothing selected, or
+   credited to a daily since deleted. Hollow and neutral: the work happened, but
+   there is no intention left to name or colour it. */
+.cal-dot--loose .cal-dot-mark {
+  background: transparent;
+  border: 1.5px solid var(--comet);
+}
+
+/* A day with nothing on it still draws its baseline, so the gaps read as days
+   you didn't work rather than as cells that failed to load. */
+.cal-baseline {
+  width: 10px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--horizon);
+}
+
+/* The name rides along in the DOM at every size: shown inline in the mobile
+   agenda, and revealed on hover as a label on the grid. */
+.cal-dot-name {
+  display: none;
+}
+
+.cal-dot::after {
+  content: attr(data-name);
+  position: absolute;
+  z-index: 2;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  translate: -50% 0;
+  padding: var(--s-4) var(--s-8);
+  border: 1px solid var(--horizon);
+  border-radius: var(--s-8);
+  background: var(--dust);
+  color: var(--starlight);
+  font-size: var(--text-caption);
+  line-height: 1.3;
+  /* A title can run to 80 characters, so the label wraps within a measure
+     rather than growing a single line wider than the column it sits in. */
+  width: max-content;
+  max-width: 180px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-fast) var(--ease-inout);
+}
+
+/* Centred on the dot everywhere except the outer columns, where a centred
+   label would hang past the edge of the scrolling canvas and drag a horizontal
+   scrollbar into being. Those two anchor to the inside instead. */
+.cal-grid > :nth-child(7n + 1) .cal-dot::after {
+  left: 0;
+  translate: 0 0;
+}
+
+.cal-grid > :nth-child(7n) .cal-dot::after {
+  left: auto;
+  right: 0;
+  translate: 0 0;
+}
+
+.cal-dot:hover::after {
+  opacity: 1;
+}
+
+/* Nothing hovers on a touch screen, and the agenda spells the names out. */
+@media (pointer: coarse) {
+  .cal-dot::after {
+    content: none;
+  }
+}
+
+/* --- The day panel ---------------------------------------------------------
+   What a day held, in words. A reader's panel: nothing in it can be checked,
+   edited, or added — completing a daily happens in the Dailies tool, on the
+   day itself. */
+
+.cal-panel {
+  margin-top: var(--s-24);
+  padding: var(--s-24);
+  background: var(--nebula);
+  border: 1px solid var(--horizon);
+  border-radius: var(--r-card);
+  animation: cal-panel-in var(--dur-mid) var(--ease-out);
+}
+
+@keyframes cal-panel-in {
+  from {
+    opacity: 0;
+    translate: 0 4px;
+  }
+}
+
+.cal-panel-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-16);
+}
+
+.cal-panel-title {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: var(--text-title);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--starlight);
+}
+
+.cal-panel-summary {
+  margin: var(--s-4) 0 0;
+  font-size: var(--text-body);
+  color: var(--moonlight);
+  font-variant-numeric: tabular-nums;
+}
+
+.cal-panel-empty {
+  margin: var(--s-4) 0 0;
+  font-size: var(--text-body);
+  color: var(--moonlight);
+}
+
+.cal-panel-list {
+  margin: var(--s-16) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cal-panel-item {
+  display: flex;
+  align-items: center;
+  gap: var(--s-12);
+  padding: var(--s-8) 0;
+}
+
+.cal-panel-item + .cal-panel-item {
+  border-top: 1px solid var(--horizon);
+}
+
+.cal-panel-item--loose .cal-dot-mark {
+  background: transparent;
+  border: 1.5px solid var(--comet);
+}
+
+.cal-panel-name {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--text-body);
+  color: var(--starlight);
+  overflow-wrap: anywhere;
+}
+
+.cal-panel-item--loose .cal-panel-name {
+  color: var(--moonlight);
+}
+
+.cal-panel-count {
+  flex: 0 0 auto;
+  font-size: var(--text-label);
+  color: var(--moonlight);
+  font-variant-numeric: tabular-nums;
+}
+
+.cal-note {
+  margin: var(--s-24) 0 0;
+  max-width: 60ch;
+  font-size: var(--text-body);
+  line-height: 1.6;
+  color: var(--moonlight);
+}
+
+/* --- Mobile: the grid becomes an agenda ------------------------------------
+   The month reflows into one row per day rather than squeezing seven columns
+   into a phone. Each row names its own weekday and spells its dailies out, so
+   nothing depends on a hover that a touch screen can't perform. */
+
+@media (max-width: 640px) {
+  .calendar {
+    padding: var(--s-24) var(--s-16) var(--s-48);
+  }
+
+  .cal-month {
+    font-size: var(--text-title);
+    font-family: var(--font-ui);
+    font-weight: 600;
+  }
+
+  .cal-weekdays {
+    display: none;
+  }
+
+  .cal-pad {
+    display: none;
+  }
+
+  .cal-grid {
+    display: block;
+    padding: var(--s-8) var(--s-16);
+  }
+
+  .cal-day {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--s-12);
+    width: 100%;
+    min-height: 44px;
+    padding: var(--s-12) var(--s-4);
+    border-radius: var(--s-8);
+  }
+
+  .cal-day + .cal-day {
+    border-top: 1px solid var(--horizon);
+  }
+
+  .cal-weekday-inline {
+    display: block;
+    flex: 0 0 auto;
+    width: 3ch;
+    font-size: var(--text-caption);
+    color: var(--moonlight);
+  }
+
+  /* Dots stack into a named list: the colour still carries the identity, and
+     the title next to it removes the need to tap and wait. */
+  .cal-dots {
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--s-4);
+  }
+
+  .cal-dot-name {
+    display: block;
+    font-size: var(--text-caption);
+    color: var(--moonlight);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .cal-panel {
+    padding: var(--s-16);
+  }
+}
