@@ -148,8 +148,9 @@ sessionStore.checkpoint();
 
 // --- Completed focus phases -------------------------------------------------
 // The seam between the timer and everything that wants to know a focus block
-// finished. Listeners receive `{ at, minutes }`: goals credits the active goal,
-// the session log writes an entry, and a dashboard will want the same event.
+// finished. Listeners receive `{ at, minutes }`: dailies credits the active
+// daily, the session log writes an entry, and the calendar will read the same
+// history back.
 
 const focusCompleteListeners = new Set();
 

@@ -3,8 +3,8 @@ import { createStore, useStore } from "./store.js";
 /**
  * An append-only record of completed focus blocks.
  *
- * The goals tool keeps a running count per goal, but a count can't answer when
- * you worked, how long for, or whether you worked at all yesterday — and none
+ * The dailies tool keeps a running count per daily, but a count can't answer
+ * when you worked, how long for, or whether you worked at all yesterday — none
  * of that can be reconstructed after the fact. Every focus block that finishes
  * without being written down is history that is simply gone, so the log starts
  * now, before anything reads from it.
@@ -22,10 +22,14 @@ function sanitizeEntry(raw) {
   if (!Number.isFinite(at) || at <= 0) return null;
 
   const minutes = Math.round(Number(raw.minutes));
+  // `goalId` is what this field was called before the Goals tool became
+  // Dailies. Entries written under the old name are read under the new one, so
+  // the log keeps naming what a session counted toward across the rename.
+  const dailyId = raw.dailyId ?? raw.goalId;
   return {
     at,
     minutes: Number.isFinite(minutes) && minutes > 0 ? minutes : 0,
-    goalId: typeof raw.goalId === "string" && raw.goalId ? raw.goalId : null,
+    dailyId: typeof dailyId === "string" && dailyId ? dailyId : null,
   };
 }
 
@@ -46,8 +50,8 @@ export const sessionsStore = createStore({
 
 sessionsStore.checkpoint();
 
-export function recordSession({ at, minutes, goalId }) {
-  const entry = sanitizeEntry({ at, minutes, goalId });
+export function recordSession({ at, minutes, dailyId }) {
+  const entry = sanitizeEntry({ at, minutes, dailyId });
   if (!entry) return;
 
   sessionsStore.set((state) => {
@@ -60,6 +64,14 @@ export function recordSession({ at, minutes, goalId }) {
 const startOfDay = (ts) => {
   const date = new Date(ts);
   date.setHours(0, 0, 0, 0);
+  return date.getTime();
+};
+
+// Days are stepped with setDate rather than by subtracting 86,400,000 so the
+// buckets stay aligned to local midnight across a daylight-saving change.
+const shiftDays = (ts, delta) => {
+  const date = new Date(ts);
+  date.setDate(date.getDate() + delta);
   return date.getTime();
 };
 
@@ -77,6 +89,55 @@ export function minutesToday(state, now = Date.now()) {
   let total = 0;
   for (const entry of state.items) if (entry.at >= from) total += entry.minutes;
   return total;
+}
+
+/** Sessions per local day for the last `days` days, oldest first, today last. */
+export function dailyCounts(state, days, now = Date.now()) {
+  const today = startOfDay(now);
+  const buckets = new Map();
+  for (let i = days - 1; i >= 0; i -= 1) buckets.set(shiftDays(today, -i), 0);
+
+  for (const entry of state.items) {
+    const key = startOfDay(entry.at);
+    if (buckets.has(key)) buckets.set(key, buckets.get(key) + 1);
+  }
+
+  return [...buckets].map(([date, count]) => ({ date, count }));
+}
+
+/**
+ * Consecutive days ending today that have at least one focus block.
+ *
+ * A day you haven't worked yet doesn't break the streak — only a day that
+ * finished without one does. Counting today as a miss before it's over would
+ * report a lapse every morning.
+ */
+export function currentStreak(state, now = Date.now()) {
+  if (state.items.length === 0) return 0;
+
+  const worked = new Set(state.items.map((entry) => startOfDay(entry.at)));
+  let cursor = startOfDay(now);
+  if (!worked.has(cursor)) cursor = shiftDays(cursor, -1);
+
+  let streak = 0;
+  while (worked.has(cursor)) {
+    streak += 1;
+    cursor = shiftDays(cursor, -1);
+  }
+  return streak;
+}
+
+/** Totals over the last `days` days, today included. */
+export function summarize(state, days, now = Date.now()) {
+  const from = shiftDays(startOfDay(now), -(days - 1));
+  let sessions = 0;
+  let minutes = 0;
+  for (const entry of state.items) {
+    if (entry.at < from) continue;
+    sessions += 1;
+    minutes += entry.minutes;
+  }
+  return { sessions, minutes };
 }
 
 export const useSessions = () => useStore(sessionsStore);
