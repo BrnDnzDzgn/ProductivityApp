@@ -1,0 +1,323 @@
+/* ---------------------------------------------------------------------------
+   Orbit — shared components
+   The pieces every tool builds from: buttons, inputs, chips, the composer row,
+   the undo bar. They live here rather than in whichever tool happened to need
+   them first, so a tool never depends on another tool's stylesheet.
+
+   Loaded once from main.jsx, immediately after the tokens and before any tool,
+   so a tool can always override what it finds here.
+
+   Order within this file is load-bearing in two places: a modifier has the same
+   specificity as the class it modifies, so `.button--primary` must follow
+   `.button`, and `.icon-button--small` must follow the coarse-pointer rule it
+   is expected to win against.
+   --------------------------------------------------------------------------- */
+
+/* --- Buttons --------------------------------------------------------------- */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-8);
+  min-height: 44px;
+  padding: 0 var(--s-24);
+  border: 1px solid transparent;
+  border-radius: var(--r-button);
+  font-family: inherit;
+  font-size: var(--text-body);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-inout),
+    border-color var(--dur-fast) var(--ease-inout),
+    color var(--dur-fast) var(--ease-inout);
+}
+
+.button:active {
+  translate: 0 1px;
+}
+
+.button--primary {
+  background: var(--aurora);
+  color: var(--void);
+}
+
+.button--primary:hover {
+  background: var(--aurora-deep);
+}
+
+.button--secondary {
+  background: transparent;
+  border-color: var(--horizon);
+  color: var(--starlight);
+}
+
+.button--secondary:hover {
+  background: var(--dust);
+}
+
+/* --- Icon buttons ---------------------------------------------------------- */
+
+.icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: var(--r-input);
+  background: transparent;
+  color: var(--moonlight);
+  font: inherit;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-inout),
+    color var(--dur-fast) var(--ease-inout);
+}
+
+.icon-button:hover {
+  background: var(--nebula);
+  color: var(--starlight);
+}
+
+@media (pointer: coarse) {
+  .icon-button {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+.icon-button--small {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--s-8);
+}
+
+.icon-button--danger:hover {
+  background: var(--nebula);
+  color: var(--flare);
+}
+
+/* --- Text buttons ---------------------------------------------------------- */
+
+.text-button {
+  padding: var(--s-4) 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-weight: 500;
+  color: var(--starlight);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-inout);
+}
+
+.text-button:hover {
+  color: var(--aurora);
+}
+
+.text-button:disabled {
+  color: var(--comet);
+  cursor: not-allowed;
+}
+
+/* --- Fields ---------------------------------------------------------------- */
+
+.field-label {
+  display: block;
+  margin-bottom: var(--s-8);
+  font-size: var(--text-label);
+  font-weight: 500;
+  color: var(--moonlight);
+}
+
+.field-input {
+  width: 100%;
+  padding: var(--s-12);
+  border: 1px solid var(--horizon);
+  border-radius: var(--r-input);
+  background: var(--deep-space);
+  color: var(--starlight);
+  font-family: inherit;
+  font-size: 1rem; /* 16px keeps iOS from zooming on focus */
+  font-weight: 500;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  transition: border-color var(--dur-fast) var(--ease-inout),
+    box-shadow var(--dur-fast) var(--ease-inout);
+}
+
+.field-input:focus-visible {
+  outline: none;
+  border-color: var(--aurora);
+  box-shadow: 0 0 0 2px rgb(124 156 255 / 0.25);
+}
+
+.field-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* --- Chips ----------------------------------------------------------------- */
+
+.chips {
+  display: flex;
+  gap: var(--s-4);
+}
+
+.chip {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 var(--s-8);
+  border: 1px solid var(--horizon);
+  border-radius: var(--s-8);
+  background: transparent;
+  color: var(--moonlight);
+  font-family: inherit;
+  font-size: var(--text-label);
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-inout),
+    border-color var(--dur-fast) var(--ease-inout),
+    color var(--dur-fast) var(--ease-inout);
+}
+
+.chip--wide {
+  margin-left: var(--s-8);
+}
+
+.chip:hover {
+  border-color: var(--dust);
+  color: var(--starlight);
+}
+
+.chip[aria-pressed="true"] {
+  background: var(--aurora);
+  border-color: var(--aurora);
+  color: var(--void);
+}
+
+.chip[aria-pressed="true"]:hover {
+  background: var(--aurora-deep);
+  border-color: var(--aurora-deep);
+}
+
+@media (pointer: coarse) {
+  .chip {
+    min-width: 40px;
+    height: 40px;
+  }
+}
+
+/* --- The composer row ------------------------------------------------------
+   The "write a new one down" row at the top of Dailies and Goals. */
+
+.composer {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--s-8);
+}
+
+.composer-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.composer .field-input {
+  height: 48px;
+  padding: 0 var(--s-12);
+  text-align: left;
+}
+
+.composer-add {
+  flex: 0 0 auto;
+  min-height: 48px;
+}
+
+/* --- Labelled control groups ----------------------------------------------
+   A quiet label beside a row of chips or swatches. */
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-16) var(--s-24);
+  margin-top: var(--s-16);
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  gap: var(--s-12);
+}
+
+.control-label {
+  font-size: var(--text-label);
+  font-weight: 500;
+  color: var(--moonlight);
+}
+
+/* --- Undo ------------------------------------------------------------------
+   Sticks to the bottom of the scrolling list, so it is reachable whether or not
+   the list has been scrolled. */
+
+.undo {
+  position: sticky;
+  bottom: var(--s-16);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--s-16);
+  /* Inset from the list, so that while the list is scrolled underneath it the
+     card's edge stays visible on both sides and the bar reads as floating above
+     rather than as a broken row. */
+  margin: var(--s-24) var(--s-8) 0;
+  padding: var(--s-12) var(--s-16);
+  border-radius: var(--r-button);
+  background: var(--dust);
+  animation: undo-in var(--dur-mid) var(--ease-out);
+}
+
+.undo-text {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--text-label);
+  color: var(--starlight);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@keyframes undo-in {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+  }
+}
+
+@media (max-width: 560px) {
+  .composer {
+    flex-wrap: wrap;
+  }
+
+  .composer-field {
+    flex: 1 0 100%;
+  }
+
+  .composer-add {
+    flex: 1;
+  }
+
+  .control {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--s-8);
+  }
+
+  .chips {
+    flex-wrap: wrap;
+  }
+
+  .chip--wide {
+    margin-left: 0;
+  }
+}

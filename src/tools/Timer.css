@@ -59,35 +59,6 @@
   gap: var(--s-4);
 }
 
-.icon-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border: none;
-  border-radius: var(--r-input);
-  background: transparent;
-  color: var(--moonlight);
-  font: inherit;
-  cursor: pointer;
-  transition: background var(--dur-fast) var(--ease-inout),
-    color var(--dur-fast) var(--ease-inout);
-}
-
-.icon-button:hover {
-  background: var(--nebula);
-  color: var(--starlight);
-}
-
-@media (pointer: coarse) {
-  .icon-button {
-    width: 44px;
-    height: 44px;
-  }
-}
-
 /* --- Round progress --------------------------------------------------------
    The glanceable read: how far through the set you are, legible from across a
    room. The detail lives in the status line instead of being repeated here. */
@@ -185,57 +156,20 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* --- Controls -------------------------------------------------------------- */
+/* --- Controls --------------------------------------------------------------
+   Scoped to the tool on purpose. `.controls` unqualified collided with the
+   labelled control groups in Dailies and Goals, and because that stylesheet
+   loads later it was silently winning — this row was being drawn with their
+   wrap, gap, and top margin instead of its own. */
 
-.controls {
+.timer-controls {
   display: flex;
   gap: var(--s-12);
 }
 
-.button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--s-8);
-  min-height: 44px;
-  padding: 0 var(--s-24);
-  border: 1px solid transparent;
-  border-radius: var(--r-button);
-  font-family: inherit;
-  font-size: var(--text-body);
-  font-weight: 500;
-  cursor: pointer;
-  transition: background var(--dur-fast) var(--ease-inout),
-    border-color var(--dur-fast) var(--ease-inout),
-    color var(--dur-fast) var(--ease-inout);
-}
+/* --- The daily this session counts toward --------------------------------- */
 
-.button:active {
-  translate: 0 1px;
-}
-
-.button--primary {
-  background: var(--aurora);
-  color: var(--void);
-}
-
-.button--primary:hover {
-  background: var(--aurora-deep);
-}
-
-.button--secondary {
-  background: transparent;
-  border-color: var(--horizon);
-  color: var(--starlight);
-}
-
-.button--secondary:hover {
-  background: var(--dust);
-}
-
-/* --- The goal this session counts toward --------------------------------- */
-
-.timer-goal {
+.timer-daily {
   display: inline-flex;
   align-items: baseline;
   gap: var(--s-8);
@@ -251,11 +185,11 @@
   transition: color var(--dur-fast) var(--ease-inout);
 }
 
-.timer-goal:hover {
+.timer-daily:hover {
   color: var(--starlight);
 }
 
-.timer-goal-count {
+.timer-daily-count {
   color: var(--moonlight);
   font-variant-numeric: tabular-nums;
 }
@@ -306,41 +240,7 @@
   margin-top: var(--s-24);
 }
 
-.field-label {
-  display: block;
-  margin-bottom: var(--s-8);
-  font-size: var(--text-label);
-  font-weight: 500;
-  color: var(--moonlight);
-}
-
 /* Inputs are holes you type into, not raised buttons. */
-.field-input {
-  width: 100%;
-  padding: var(--s-12);
-  border: 1px solid var(--horizon);
-  border-radius: var(--r-input);
-  background: var(--deep-space);
-  color: var(--starlight);
-  font-family: inherit;
-  font-size: 1rem; /* 16px keeps iOS from zooming on focus */
-  font-weight: 500;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-  transition: border-color var(--dur-fast) var(--ease-inout),
-    box-shadow var(--dur-fast) var(--ease-inout);
-}
-
-.field-input:focus-visible {
-  outline: none;
-  border-color: var(--aurora);
-  box-shadow: 0 0 0 2px rgb(124 156 255 / 0.25);
-}
-
-.field-input:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
 
 @keyframes scrim-in {
   from {

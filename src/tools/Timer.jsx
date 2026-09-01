@@ -12,9 +12,13 @@ import {
   useTimerSession,
   useTimerSettings,
 } from "../lib/timer.js";
-import { selectActiveGoal, useGoals } from "../lib/goals.js";
+import { selectActiveDaily, useDailies } from "../lib/dailies.js";
+import { useCompletions } from "../lib/completions.js";
+import { progressFor } from "../lib/progress.js";
+import { useSessions } from "../lib/sessions.js";
 import { navigate } from "../lib/router.js";
 import { isAvailable } from "../lib/storage.js";
+import { useToday } from "../lib/today.js";
 import "./Timer.css";
 
 const clockTime = (ts) =>
@@ -32,10 +36,19 @@ const storageWorks = isAvailable();
 export default function Timer() {
   const session = useTimerSession();
   const settings = useTimerSettings();
-  const goals = useGoals();
+  const dailies = useDailies();
+  const sessions = useSessions();
+  const completions = useCompletions();
   const [settingsOpen, setSettingsOpen] = useState(false);
 
-  const activeGoal = selectActiveGoal(goals);
+  // A daily only takes sessions on the days it repeats on, so what the timer
+  // says it is counting toward depends on which day it currently is. Its
+  // standing is counted out of today's log, not read off the daily.
+  const today = useToday();
+  const activeDaily = selectActiveDaily(dailies, today);
+  const activeProgress = activeDaily
+    ? progressFor(sessions, completions, activeDaily, today)
+    : null;
 
   const total = totalForPhase(session, settings);
   const remaining = session.finished ? 0 : Math.min(session.remaining, total);
@@ -132,7 +145,7 @@ export default function Timer() {
         </div>
       </div>
 
-      <div className="controls">
+      <div className="timer-controls">
         <button
           type="button"
           className="button button--primary"
@@ -151,11 +164,12 @@ export default function Timer() {
         </button>
       </div>
 
-      {activeGoal && (
-        <button type="button" className="timer-goal" onClick={() => navigate("goals")}>
-          {activeGoal.title}
-          <span className="timer-goal-count">
-            · {activeGoal.sessions} of {activeGoal.target} sessions
+      {activeDaily && (
+        <button type="button" className="timer-daily" onClick={() => navigate("dailies")}>
+          {activeDaily.title}
+          <span className="timer-daily-count">
+            · {activeProgress.count} of {activeDaily.target} today
+            {activeProgress.manual ? " · marked done" : activeProgress.complete ? " · done" : ""}
           </span>
         </button>
       )}
@@ -265,7 +279,7 @@ function SettingsDialog({ settings, locked, onClose }) {
         {!storageWorks && (
           <p className="dialog-note">
             This browser won&rsquo;t let Orbit save anything, so your settings, timer, and
-            goals will reset when you close the tab.
+            dailies will reset when you close the tab.
           </p>
         )}
 
