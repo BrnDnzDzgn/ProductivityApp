@@ -1,8 +1,9 @@
 /* ---------------------------------------------------------------------------
    Orbit — goals
-   A product surface in the Operate mode: a list you scan, act on, and leave.
-   Density and scanability over expression; the one accent points at whichever
-   goal the timer is currently counting toward.
+   The longer-horizon surface. Quieter than Dailies by design: nothing here is
+   counting down, nothing completes itself, and the only thing that moves is a
+   check you put there. Aurora appears twice — the add action, and the mark of a
+   goal you have decided is done.
    --------------------------------------------------------------------------- */
 
 .goals {
@@ -13,49 +14,32 @@
 }
 
 .goals-column {
-  max-width: 640px;
+  max-width: 720px;
   margin: 0 auto;
 }
 
-/* --- Composer -------------------------------------------------------------- */
+/* --- Sections -------------------------------------------------------------- */
 
-.composer {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--s-8);
+.goal-section {
+  margin-top: var(--s-32);
 }
 
-.composer-field {
-  flex: 1;
-  min-width: 0;
+.goal-section-title {
+  margin: 0;
+  font-size: var(--text-label);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--moonlight);
 }
 
-.composer-field--target {
-  flex: 0 0 92px;
+.goal-section-note {
+  margin: var(--s-8) 0 0;
+  font-size: var(--text-caption);
+  color: var(--comet);
 }
-
-.composer .field-input {
-  height: 48px;
-  padding: 0 var(--s-12);
-  text-align: left;
-}
-
-.composer-add {
-  min-height: 48px;
-}
-
-.composer-field--target .field-input {
-  text-align: center;
-}
-
-.composer-add {
-  flex: 0 0 auto;
-}
-
-/* --- The list -------------------------------------------------------------- */
 
 .goal-list {
-  margin: var(--s-32) 0 0;
+  margin: var(--s-12) 0 0;
   padding: 0 var(--s-24);
   list-style: none;
   background: var(--nebula);
@@ -64,34 +48,63 @@
 }
 
 .goal {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--s-16);
   padding: var(--s-16) 0;
 }
 
-/* Hollow until the goal means something: filled Aurora while the timer counts
-   toward it, filled Meridian once it's done. */
-.goal-marker {
-  flex: 0 0 auto;
-  width: 9px;
-  height: 9px;
-  margin-top: 7px;
-  border: 1px solid var(--dust);
-  border-radius: 50%;
-  background: transparent;
-  transition: background var(--dur-mid) var(--ease-inout),
-    border-color var(--dur-mid) var(--ease-inout);
+.goal + .goal {
+  border-top: 1px solid var(--horizon);
 }
 
-.goal[data-active="true"] .goal-marker {
+.goal-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-12);
+}
+
+/* --- The check ------------------------------------------------------------
+   A hand action and only ever a hand action: no child finishing, no week
+   ending, nothing else sets this. Empty until you say so. */
+
+.goal-check {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  padding: 0;
+  border: 1.5px solid var(--horizon);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--void);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-inout),
+    border-color var(--dur-fast) var(--ease-inout);
+}
+
+.goal-check:hover {
+  border-color: var(--aurora);
+}
+
+.goal-check[aria-checked="true"] {
   background: var(--aurora);
   border-color: var(--aurora);
 }
 
-.goal[data-done="true"] .goal-marker {
-  background: var(--meridian);
-  border-color: var(--meridian);
+.goal-check[aria-checked="true"]:hover {
+  background: var(--aurora-deep);
+  border-color: var(--aurora-deep);
+}
+
+/* A 20px box is under the 44px touch minimum, so the target is widened around
+   it rather than the box being drawn bigger than it should read. */
+@media (pointer: coarse) {
+  .goal-check {
+    width: 24px;
+    height: 24px;
+    outline-offset: 6px;
+  }
 }
 
 .goal-body {
@@ -123,38 +136,21 @@
   text-underline-offset: 4px;
 }
 
+/* A checked goal settles back rather than being struck through — it is
+   resolved, not cancelled. */
 .goal[data-done="true"] .goal-title {
   color: var(--moonlight);
 }
 
-.goal-meta {
+/* The progress line: a sentence, never a bar. It reports how the children are
+   going and asks nothing. */
+.goal-summary {
   margin: var(--s-4) 0 0;
   font-size: var(--text-caption);
   line-height: 1.4;
   color: var(--moonlight);
   font-variant-numeric: tabular-nums;
 }
-
-.goal-track {
-  height: 2px;
-  margin-top: var(--s-12);
-  border-radius: 999px;
-  background: var(--horizon);
-  overflow: hidden;
-}
-
-.goal-fill {
-  height: 100%;
-  border-radius: 999px;
-  background: var(--aurora);
-  transition: width var(--dur-slow) var(--ease-out), background var(--dur-mid) var(--ease-inout);
-}
-
-.goal[data-done="true"] .goal-fill {
-  background: var(--meridian);
-}
-
-/* --- Row actions ----------------------------------------------------------- */
 
 .goal-actions {
   display: flex;
@@ -169,125 +165,272 @@
   opacity: 1;
 }
 
-/* Nothing hovers on a touch screen. */
 @media (pointer: coarse) {
   .goal-actions {
     opacity: 1;
   }
 }
 
-.icon-button--small {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--s-8);
-}
-
-.icon-button--danger:hover {
-  background: var(--nebula);
-  color: var(--flare);
-}
-
-.goal[data-active="true"] .icon-button--active {
-  color: var(--aurora);
-}
-
-/* --- Editing in place ------------------------------------------------------ */
-
-.goal-edit {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-8);
-}
-
-.goal-edit-title {
-  height: 40px;
-  padding: 0 var(--s-12);
-  text-align: left;
-}
-
-.goal-edit-row {
+.goal-rename {
   display: flex;
   align-items: center;
   gap: var(--s-12);
 }
 
-.goal-edit-target {
-  width: 72px;
+.goal-rename-input {
+  flex: 1;
+  min-width: 0;
   height: 36px;
-  padding: 0 var(--s-8);
+  padding: 0 var(--s-12);
+  text-align: left;
 }
 
-.goal-edit-unit {
-  margin-right: auto;
-  font-size: var(--text-label);
-  color: var(--moonlight);
+/* --- Children --------------------------------------------------------------
+   Indented under their parent with a hairline rule rather than a card of their
+   own — a card inside a card is the structural smell DESIGN.md warns about. */
+
+.child-list {
+  margin: var(--s-12) 0 0 var(--s-32);
+  padding: 0 0 0 var(--s-16);
+  list-style: none;
+  border-left: 1px solid var(--horizon);
 }
 
-.text-button {
-  padding: var(--s-4) 0;
+.child {
+  display: flex;
+  align-items: center;
+  gap: var(--s-12);
+  padding: var(--s-8) 0;
+}
+
+/* The same ink language the calendar uses, so a daily reads identically
+   wherever it turns up: solid earned, donut marked by hand, ring partial. */
+.child-mark {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--daily-color);
+}
+
+.child-mark[data-state="manual"] {
+  background: transparent;
+  border: 3px solid var(--daily-color);
+}
+
+.child-mark[data-state="partial"] {
+  background: transparent;
+  border: 1.5px solid var(--daily-color);
+}
+
+/* Nothing is owed on a day a daily doesn't recur, so it recedes rather than
+   reading as an unfinished obligation. */
+.child-mark[data-state="unscheduled"] {
+  background: transparent;
+  border: 1.5px solid var(--horizon);
+}
+
+.child-mark--goal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid var(--horizon);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--void);
+}
+
+.child-mark--goal[data-done="true"] {
+  background: var(--aurora);
+  border-color: var(--aurora);
+}
+
+.child-title {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
   border: none;
   background: none;
   font: inherit;
-  font-weight: 500;
-  color: var(--starlight);
-  cursor: pointer;
-  transition: color var(--dur-fast) var(--ease-inout);
-}
-
-.text-button:hover {
-  color: var(--aurora);
-}
-
-.text-button:disabled {
-  color: var(--comet);
-  cursor: not-allowed;
-}
-
-/* --- Undo ------------------------------------------------------------------
-   Sticks to the bottom of the scrolling list, so it is reachable whether or not
-   the list has been scrolled. */
-
-.undo {
-  position: sticky;
-  bottom: var(--s-16);
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  gap: var(--s-16);
-  /* Inset from the list, so that while the list is scrolled underneath it the
-     card's edge stays visible on both sides and the bar reads as floating above
-     rather than as a broken row. */
-  margin: var(--s-24) var(--s-8) 0;
-  padding: var(--s-12) var(--s-16);
-  border-radius: var(--r-button);
-  background: var(--dust);
-  animation: undo-in var(--dur-mid) var(--ease-out);
-}
-
-.undo-text {
-  flex: 1;
-  min-width: 0;
   font-size: var(--text-label);
   color: var(--starlight);
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: text;
+}
+
+.child-title:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--dust);
+  text-underline-offset: 3px;
+}
+
+.child-title--static {
+  cursor: default;
+}
+
+.child-title--static:hover {
+  text-decoration: none;
+}
+
+.child--goal[data-done="true"] .child-title {
+  color: var(--moonlight);
+}
+
+.child-meta {
+  min-width: 0;
+  font-size: var(--text-caption);
+  color: var(--comet);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-@keyframes undo-in {
-  from {
-    opacity: 0;
-    translate: 0 6px;
+.child-standing {
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-size: var(--text-caption);
+  color: var(--moonlight);
+  font-variant-numeric: tabular-nums;
+}
+
+.child[data-state="unscheduled"] .child-standing,
+.child[data-state="unscheduled"] .child-title {
+  color: var(--comet);
+}
+
+.child-detach {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--s-4);
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-inout);
+}
+
+.child:hover .child-detach,
+.child:focus-within .child-detach {
+  opacity: 1;
+}
+
+@media (pointer: coarse) {
+  .child-detach {
+    opacity: 1;
   }
+}
+
+/* --- Attaching a child ----------------------------------------------------- */
+
+.goal-add {
+  margin: var(--s-4) 0 0 var(--s-32);
+}
+
+.goal-add--open {
+  margin-top: var(--s-8);
+}
+
+.picker {
+  margin: 0 0 var(--s-4);
+  padding: 0;
+  list-style: none;
+}
+
+.picker-item {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-8);
+  width: 100%;
+  padding: var(--s-8) var(--s-12);
+  border: none;
+  border-radius: var(--s-8);
+  background: transparent;
+  font: inherit;
+  font-size: var(--text-label);
+  color: var(--starlight);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-inout);
+}
+
+.picker-item:hover {
+  background: var(--dust);
+}
+
+.picker-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Something already filed elsewhere says where, so moving it is a choice
+   rather than a surprise. */
+.picker-held {
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-size: var(--text-caption);
+  color: var(--comet);
+}
+
+/* --- Editing a daily from here --------------------------------------------- */
+
+.child--editing {
+  align-items: stretch;
+}
+
+.child-edit {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+  padding: var(--s-4) 0;
+}
+
+.child-edit-title {
+  height: 36px;
+  padding: 0 var(--s-12);
+  text-align: left;
+}
+
+.child-edit-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-8) var(--s-12);
+}
+
+.child-edit-label {
+  font-size: var(--text-label);
+  color: var(--moonlight);
+}
+
+.child-edit-target {
+  width: 60px;
+  height: 34px;
+  padding: 0 var(--s-8);
+}
+
+.child-edit-parent {
+  flex: 1;
+  min-width: 140px;
+  height: 34px;
+  padding: 0 var(--s-8);
+  text-align: left;
+  font-size: var(--text-label);
+  font-weight: 400;
 }
 
 /* --- Empty state ----------------------------------------------------------- */
 
 .goals-empty {
   margin: var(--s-48) 0 0;
-  max-width: 44ch;
+  max-width: 46ch;
 }
 
 .goals-empty-title {
@@ -308,24 +451,29 @@
   color: var(--moonlight);
 }
 
-@media (max-width: 560px) {
-  .composer {
-    flex-wrap: wrap;
-  }
+/* --- Mobile ---------------------------------------------------------------- */
 
-  .composer-field {
-    flex: 1 0 100%;
-  }
-
-  .composer-field--target {
-    flex: 0 0 92px;
-  }
-
-  .composer-add {
-    flex: 1;
+@media (max-width: 640px) {
+  .goals {
+    padding: var(--s-24) var(--s-16) var(--s-48);
   }
 
   .goal-list {
     padding: 0 var(--s-16);
+  }
+
+  .child-list {
+    margin-left: var(--s-16);
+    padding-left: var(--s-12);
+  }
+
+  .goal-add {
+    margin-left: var(--s-16);
+  }
+
+  /* The recurrence is the first thing to go when the row runs out of room —
+     the daily's name and how today is going matter more. */
+  .child-meta {
+    display: none;
   }
 }
