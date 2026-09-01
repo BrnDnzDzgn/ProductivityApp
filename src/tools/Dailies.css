@@ -1,0 +1,343 @@
+/* ---------------------------------------------------------------------------
+   Orbit — dailies
+   A product surface in the Operate mode: a list you scan, act on, and leave.
+   Density and scanability over expression. Each daily carries one colour, the
+   one it will wear on the calendar; Aurora is spent only on the primary action
+   and on whichever daily the timer is currently counting toward.
+   --------------------------------------------------------------------------- */
+
+.dailies {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--s-32) var(--s-24) var(--s-64);
+}
+
+.dailies-column {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+/* --- Composer -------------------------------------------------------------- */
+
+.composer-field--target {
+  flex: 0 0 92px;
+}
+
+.composer-field--target .field-input {
+  text-align: center;
+}
+
+/* --- Recurrence and colour ------------------------------------------------
+   Shared by the composer and the in-place editor, so a daily is described the
+   same way whether you are writing it down or changing your mind about it. */
+
+.swatches {
+  display: flex;
+  gap: var(--s-8);
+}
+
+/* The dot is the colour; selection is a ring around it rather than a change of
+   fill, so the eight hues stay directly comparable while you choose. */
+.swatch {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--swatch);
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity var(--dur-fast) var(--ease-inout),
+    box-shadow var(--dur-fast) var(--ease-inout);
+}
+
+.swatch:hover {
+  opacity: 1;
+}
+
+.swatch[aria-pressed="true"] {
+  opacity: 1;
+  box-shadow: 0 0 0 2px var(--deep-space), 0 0 0 3px var(--swatch);
+}
+
+@media (pointer: coarse) {
+  .swatch {
+    width: 26px;
+    height: 26px;
+  }
+}
+
+/* --- Groups ---------------------------------------------------------------
+   Today's dailies lead, because they are the only ones the timer can count
+   toward. Everything else waits below for the day it repeats on. */
+
+.daily-group {
+  margin-top: var(--s-32);
+}
+
+.daily-group-title {
+  margin: 0;
+  font-size: var(--text-label);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--moonlight);
+}
+
+.daily-group-note {
+  margin: var(--s-4) 0 0;
+  max-width: 52ch;
+  font-size: var(--text-caption);
+  line-height: 1.5;
+  color: var(--comet);
+}
+
+.daily-list {
+  margin: var(--s-12) 0 0;
+  padding: 0 var(--s-24);
+  list-style: none;
+  background: var(--nebula);
+  border: 1px solid var(--horizon);
+  border-radius: var(--r-card);
+}
+
+.daily-group-note + .daily-list {
+  margin-top: var(--s-16);
+}
+
+.daily {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-16);
+  padding: var(--s-16) 0;
+}
+
+.daily + .daily {
+  border-top: 1px solid var(--horizon);
+}
+
+/* The daily's own colour, and the only colour in the row. An Aurora ring — set
+   off by a gap so it reads even on a Periwinkle daily — marks the one the timer
+   is counting toward. */
+.daily-marker {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  margin-top: 7px;
+  border-radius: 50%;
+  background: var(--daily-color);
+  transition: opacity var(--dur-mid) var(--ease-inout),
+    box-shadow var(--dur-mid) var(--ease-inout);
+}
+
+.daily[data-active="true"] .daily-marker {
+  box-shadow: 0 0 0 2px var(--nebula), 0 0 0 3px var(--aurora);
+}
+
+.daily[data-done="true"] .daily-marker {
+  opacity: 0.45;
+}
+
+/* The same reading the calendar gives: a day finished by hand is drawn as a
+   donut rather than a solid, so the list and the month never disagree about
+   how a day was completed. */
+.daily[data-manual="true"] .daily-marker {
+  background: transparent;
+  border: 3px solid var(--daily-color);
+}
+
+/* A daily that isn't scheduled today is owed nothing: its colour recedes rather
+   than reading as an unfinished obligation. */
+.daily[data-scheduled="false"] .daily-marker {
+  opacity: 0.3;
+}
+
+.daily-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.daily-title {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--starlight);
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: text;
+  transition: color var(--dur-mid) var(--ease-inout);
+}
+
+.daily-title:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--dust);
+  text-underline-offset: 4px;
+}
+
+.daily[data-done="true"] .daily-title {
+  color: var(--moonlight);
+}
+
+.daily-meta,
+.daily-recurrence {
+  margin: var(--s-4) 0 0;
+  font-size: var(--text-caption);
+  line-height: 1.4;
+  color: var(--moonlight);
+}
+
+.daily-meta {
+  font-variant-numeric: tabular-nums;
+}
+
+/* The schedule is standing information, not news — it sits below the count it
+   qualifies and reads a step quieter. */
+.daily-recurrence {
+  margin-top: 2px;
+  color: var(--comet);
+}
+
+.daily-track {
+  height: 2px;
+  margin-top: var(--s-12);
+  border-radius: 999px;
+  background: var(--horizon);
+  overflow: hidden;
+}
+
+.daily-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--daily-color);
+  transition: width var(--dur-slow) var(--ease-out);
+}
+
+.daily[data-done="true"] .daily-fill {
+  opacity: 0.45;
+}
+
+/* What the record claimed under the lifetime model, kept visible until the
+   person resolves it by editing the daily. Quiet: it is a note, not a warning —
+   nothing is broken and nothing was lost. */
+.daily-legacy {
+  margin: var(--s-8) 0 0;
+  max-width: 56ch;
+  padding: var(--s-8) var(--s-12);
+  border-left: 2px solid var(--horizon);
+  border-radius: 0 var(--s-4) var(--s-4) 0;
+  background: var(--deep-space);
+  font-size: var(--text-caption);
+  line-height: 1.5;
+  color: var(--moonlight);
+}
+
+/* --- Row actions ----------------------------------------------------------- */
+
+.daily-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: var(--s-4);
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-inout);
+}
+
+.daily:hover .daily-actions,
+.daily:focus-within .daily-actions {
+  opacity: 1;
+}
+
+/* Nothing hovers on a touch screen. */
+@media (pointer: coarse) {
+  .daily-actions {
+    opacity: 1;
+  }
+}
+
+.daily[data-active="true"] .icon-button--active {
+  color: var(--aurora);
+}
+
+/* --- Editing in place ------------------------------------------------------ */
+
+.daily-edit {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+}
+
+.daily-edit-title {
+  height: 40px;
+  padding: 0 var(--s-12);
+  text-align: left;
+}
+
+.daily-edit .controls {
+  margin-top: var(--s-4);
+}
+
+.daily-edit-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-12);
+}
+
+.daily-edit-target {
+  width: 72px;
+  height: 36px;
+  padding: 0 var(--s-8);
+}
+
+.daily-edit-unit {
+  margin-right: auto;
+  font-size: var(--text-label);
+  color: var(--moonlight);
+}
+
+/* --- Undo ------------------------------------------------------------------
+   Sticks to the bottom of the scrolling list, so it is reachable whether or not
+   the list has been scrolled. */
+
+/* --- Empty state ----------------------------------------------------------- */
+
+.dailies-empty {
+  margin: var(--s-48) 0 0;
+  max-width: 44ch;
+}
+
+.dailies-empty-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-display-m);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  color: var(--starlight);
+}
+
+.dailies-empty-body {
+  margin: var(--s-16) 0 0;
+  font-size: var(--text-body-l);
+  line-height: 1.6;
+  color: var(--moonlight);
+}
+
+@media (max-width: 560px) {
+  .composer-field--target {
+    flex: 0 0 92px;
+  }
+
+  .daily-list {
+    padding: 0 var(--s-16);
+  }
+}
