@@ -1,0 +1,214 @@
+/* ---------------------------------------------------------------------------
+   Orbit — habits
+   A mirror. Every mark on this page is a reading of a daily you already have,
+   and nothing on it can be clicked into changing anything. The quietest surface
+   in the product on purpose: it answers one question, once, and asks nothing.
+   --------------------------------------------------------------------------- */
+
+.habits {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--s-32) var(--s-24) var(--s-64);
+}
+
+.habits-column {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* The one line that says where habits come from, and the only link off this
+   page. It sits above everything because it frames what follows. */
+.habits-note {
+  margin: 0;
+  max-width: 62ch;
+  font-size: var(--text-body);
+  line-height: 1.6;
+  color: var(--moonlight);
+}
+
+.habits-note .text-button {
+  font-size: inherit;
+  font-weight: 500;
+  vertical-align: baseline;
+}
+
+/* Stated in words rather than drawn as an axis, the same way the Activity
+   chart names its scale. */
+.habits-scale {
+  margin: var(--s-32) 0 var(--s-8);
+  font-size: var(--text-caption);
+  color: var(--moonlight);
+}
+
+.habit-list {
+  margin: 0;
+  padding: 0 var(--s-24);
+  list-style: none;
+  background: var(--nebula);
+  border: 1px solid var(--horizon);
+  border-radius: var(--r-card);
+}
+
+.habit {
+  padding: var(--s-16) 0;
+}
+
+.habit + .habit {
+  border-top: 1px solid var(--horizon);
+}
+
+.habit-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-12);
+}
+
+/* The daily's own colour, the same mark it wears on the calendar. */
+.habit-dot {
+  flex: 0 0 auto;
+  align-self: center;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--daily-color);
+}
+
+.habit-title {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--starlight);
+  overflow-wrap: anywhere;
+}
+
+/* A count, sitting quietly at the end of the line. Not Aurora, not a badge,
+   nothing to defend — Aurora on this page would be pointing at a number, and
+   a number here is not the most important thing on the screen. */
+.habit-streak {
+  flex: 0 0 auto;
+  font-size: var(--text-label);
+  color: var(--starlight);
+  font-variant-numeric: tabular-nums;
+}
+
+.habit-streak-unit {
+  color: var(--moonlight);
+}
+
+.habit-streak-none {
+  color: var(--comet);
+}
+
+.habit-recurrence {
+  margin: 2px 0 0 calc(9px + var(--s-12));
+  font-size: var(--text-caption);
+  line-height: 1.4;
+  color: var(--comet);
+}
+
+/* --- The consistency strip -------------------------------------------------
+   Four weeks, one mark a day, oldest on the left. The marks share the grid so
+   every row lines up under the next and a pattern reads down the page as well
+   as across. */
+
+.habit-strip {
+  display: grid;
+  grid-template-columns: repeat(28, 1fr);
+  gap: 3px;
+  margin: var(--s-12) 0 0 calc(9px + var(--s-12));
+}
+
+.habit-mark {
+  height: 12px;
+  border-radius: 2px;
+}
+
+/* Kept. The only colour in the row, and it is the daily's own. */
+.habit-mark[data-state="done"] {
+  background: var(--daily-color);
+}
+
+/* Asked for, the day is over, nothing on it. Faint rather than alarming — this
+   is a record, not a reprimand. */
+.habit-mark[data-state="missed"] {
+  background: var(--horizon);
+}
+
+/* Today, asked for, not yet resolved. Hollow: the day is still open, and
+   drawing it as a miss would have this strip contradict the run counted at the
+   end of the row above it. */
+.habit-mark[data-state="open"] {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--dust);
+}
+
+/* Nothing was asked for, or the daily did not exist yet. Genuinely nothing:
+   an empty slot holds the grid, so the shape of a Mon/Wed/Fri habit is
+   visible in the gaps. */
+.habit-mark[data-state="unscheduled"] {
+  background: transparent;
+}
+
+.habits-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--s-12);
+  padding: 0 var(--s-24);
+  font-size: var(--text-caption);
+  color: var(--moonlight);
+}
+
+/* --- Empty state ----------------------------------------------------------- */
+
+.habits-empty {
+  margin: var(--s-48) 0 0;
+  max-width: 46ch;
+}
+
+.habits-empty-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-display-m);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  color: var(--starlight);
+}
+
+.habits-empty-body {
+  margin: var(--s-16) 0 0;
+  font-size: var(--text-body-l);
+  line-height: 1.6;
+  color: var(--moonlight);
+}
+
+/* --- Mobile ----------------------------------------------------------------
+   The strip keeps all 28 days and lets the marks narrow rather than dropping
+   days, so the window means the same thing at every size. */
+
+@media (max-width: 640px) {
+  .habits {
+    padding: var(--s-24) var(--s-16) var(--s-48);
+  }
+
+  .habit-list {
+    padding: 0 var(--s-16);
+  }
+
+  .habits-axis {
+    padding: 0 var(--s-16);
+  }
+
+  .habit-strip {
+    gap: 2px;
+  }
+
+  .habit-mark {
+    height: 14px;
+    border-radius: 1px;
+  }
+}
