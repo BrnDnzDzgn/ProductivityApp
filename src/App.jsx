@@ -3,6 +3,7 @@ import {
   Activity as ActivityIcon,
   CalendarDays,
   Footprints,
+  NotebookPen,
   Repeat,
   Target,
   Timer as TimerIcon,
@@ -13,6 +14,7 @@ import DailiesTool from "./tools/Dailies.jsx";
 import GoalsTool from "./tools/Goals.jsx";
 import CalendarTool from "./tools/Calendar.jsx";
 import HabitsTool from "./tools/Habits.jsx";
+import NotesTool from "./tools/Notes.jsx";
 import ActivityTool from "./tools/Activity.jsx";
 import { dailyForSession } from "./lib/dailies.js";
 import { countToday, recordSession, useSessions } from "./lib/sessions.js";
@@ -29,6 +31,8 @@ const TOOLS = [
   { id: "calendar", label: "Calendar", icon: CalendarDays, Component: CalendarTool },
   { id: "habits", label: "Habits", icon: Footprints, Component: HabitsTool },
   { id: "activity", label: "Activity", icon: ActivityIcon, Component: ActivityTool },
+  // Notes sits last: it is the one tool that reads nothing from the others.
+  { id: "notes", label: "Notes", icon: NotebookPen, Component: NotesTool },
 ];
 
 export default function App() {

@@ -36,7 +36,7 @@ Corollary: any tool added to Orbit must earn its place by belonging to the same 
 
 ## Capabilities and Constraints
 
-**Shipped today** — a persistent app shell (left rail on desktop, bottom bar on mobile, top context strip) holding six tools:
+**Shipped today** — a persistent app shell (left rail on desktop, bottom bar on mobile, top context strip) holding seven tools:
 
 *Timer* ([src/tools/Timer.jsx](src/tools/Timer.jsx), engine in [src/lib/timer.js](src/lib/timer.js)):
 - Configurable focus length, break length, and round count, edited in a modal and locked while running.
@@ -101,15 +101,31 @@ Corollary: any tool added to Orbit must earn its place by belonging to the same 
 - Reads as sentences rather than a grid of stat tiles. A day with no focus still draws its baseline, so gaps read as days not worked rather than as missing data.
 - A day you haven't worked yet does not break a streak; only a finished day without a session does.
 
+*Notes* ([src/tools/Notes.jsx](src/tools/Notes.jsx), store in [src/lib/notes.js](src/lib/notes.js), export in [src/lib/notesExport.js](src/lib/notesExport.js)):
+- Notebooks hold pages, pages hold sub-pages to any depth. A collapsible tree navigates; the current page fills the canvas. Everything is renameable inline — the page title *is* the rename field, and a tree row renames on double-click.
+- **The tree is flat, with parent pointers** (`{ id, type, parentId, title, createdAt, updatedAt }` keyed by id). Depth is only how far you follow `parentId`, so arbitrary nesting is free and a rename or a move touches one record instead of rewriting a nested structure. It is the shape dailies and goals already use.
+- **The tree and the writing are stored apart.** `orbit:notes.tree` holds structure only and changes just on create/rename/move/delete; each page's body is its own `orbit:notes.doc.<id>`. One shared key would re-serialise every note ever written on every keystroke, on the main thread, getting slower the more someone wrote. Document writes are debounced ~500ms and flushed on blur, page change, tool exit, and `beforeunload`.
+- Because nothing in Orbit enumerates storage keys, the tree is the only index of which `doc.<id>` keys exist, so documents are always removed with their node and never separately.
+- **Quota failure is loud.** This is the one store that can plausibly fill localStorage, and a notes tool that silently stops saving is the worst failure in the product. A failed write raises a persistent Flare banner naming the problem and offering an immediate export; a later successful write clears it.
+- **Deleting cascades**, capturing the subtree *and its bodies* before removing anything, so undo restores the writing and not just the outline. A bare page goes immediately with the usual nine-second undo; a node with descendants asks first, naming the count — nine seconds is not a real reprieve for a notebook holding a month of writing, and DESIGN.md §4 requires confirmation on the irreversible. This is a deliberate departure from the undo-only pattern Dailies uses.
+- Moving a node into its own descendant is refused: parent pointers make that a ring, and a ring is a set of pages unreachable from the tree forever. A page whose parent does not survive hydration is promoted to a notebook rather than left invisible.
+- **The editor is built, not borrowed** — one controlled `<textarea>` per block, no `contenteditable` anywhere. The spec's formatting needs are entirely block-level (two heading levels, paragraphs, bullets; no inline marks), and block-level formatting needs no selection API, no `execCommand`, and no paste rescue. Markdown-style shortcuts drive it (`# `, `## `, `- `/`* `), Enter splits, Backspace at position 0 demotes then merges, arrows cross blocks. Block operations are pure functions in the lib rather than buried in the component, because a keystroke that mangles a paragraph has to be testable.
+- The deeper reason for not taking a dependency is durability, not bundle size: a ProseMirror or Lexical document is opaque, schema-versioned JSON coupled to that library. Orbit has no backend, no migration infrastructure, and no way to reach anyone's data to fix it. A four-type block array is a format we own, that round-trips to Markdown losslessly, and that a person could read out of devtools — and the tool's entire safety story is that people can get their writing out.
+- **Export is mandatory and always visible**, pinned under the tree rather than behind a menu, beside a plain statement that these notes live in one browser and nothing syncs. JSON is canonical (whole tree plus every body, re-importable); Markdown is the readable copy, every page under its full path (`Work / Q3 planning / Retro`) on a `>` line — the one line-start a page body can never produce, since blocks only ever emit `# `, `## `, `- `, or plain text. Import accepts JSON only, and replaces everything behind a confirmation naming what will be lost.
+- **Nothing typed is ever rewritten on the way out.** `**bold**` is not markup here, it is four asterisks and a word, and it exports verbatim. No escaping, no stripping, no "fixing".
+- *Known gaps, all consequences of the block model:* no inline bold/italic/links; selection cannot cross blocks (mitigated by a visible "Copy as Markdown" on every page); undo is the browser's per-textarea undo rather than document-wide; siblings are ordered by `createdAt` with no way to reorder them — an explicit `order` field is additive whenever that becomes annoying.
+
 *Session log* ([src/lib/sessions.js](src/lib/sessions.js)):
 - Append-only record of every completed focus block: when it finished, how many minutes it ran, and which daily it counted toward (`dailyId`, null when none was active — entries written before the rename carry `goalId` and are read under the new name).
 - Timestamps are the real phase boundaries, not the moment the app noticed — a throttled tab that crosses several at once still logs each at its own time.
 - Capped at 5000 entries, oldest dropped. Read by the Activity tool, the Calendar tool, and the shell's context strip; Habits will read from it too.
 - Day boundaries are stepped with `setDate` rather than by subtracting 86,400,000, so buckets stay aligned to local midnight across a daylight-saving change.
 
-**Tool sequence:** dailies shipped second (chosen 2026-08-31), then the session log, then Activity, then Calendar, then Goals, then Habits (all 2026-08-31). Remaining, per DESIGN.md §11: Notes. Skills was considered and cut.
+**Tool sequence:** dailies shipped second (chosen 2026-08-31), then the session log, then Activity, then Calendar, then Goals, then Habits, then Notes (all 2026-08-31). The roadmap in DESIGN.md §11 is complete. Skills was considered and cut.
 
-**Rail order** is Timer · Dailies · Goals · Calendar · Habits · Activity — the two tools you write intentions into, then the three that read them back. Goals took the `Target` icon, freed for it when the old Goals tool became Dailies.
+**Still outstanding:** the repository, page title, and deploy path still read "ProductivityApp"/"productivityapp" rather than Orbit, and there is no landing page — the two brand-surface jobs, neither of which is a tool.
+
+**Rail order** is Timer · Dailies · Goals · Calendar · Habits · Activity · Notes — the two tools you write intentions into, then the three that read them back, then Notes, which is last because it is the one tool that reads nothing from the others. Goals took the `Target` icon, freed for it when the old Goals tool became Dailies.
 
 **Shared stylesheet** (2026-08-31) — component classes used by more than one tool live in [src/components.css](src/components.css): buttons, icon buttons, text buttons, fields, chips, the composer row, labelled control groups, and the undo bar. Loaded once from `main.jsx` after the tokens and before any tool, so a tool can always override what it finds there. Tools no longer depend on each other's stylesheets. Order inside that file is load-bearing in two places, and commented as such: a modifier shares the specificity of the class it modifies, so `.button--primary` must follow `.button`, and `.icon-button--small` must follow the coarse-pointer rule it is expected to win against.
 

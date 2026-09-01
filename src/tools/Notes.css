@@ -1,0 +1,588 @@
+/* ---------------------------------------------------------------------------
+   Orbit — notes
+   The most spacious surface in the product, and still a product surface: a
+   quiet place to write, not a pitch. The tree is chrome and stays out of the
+   way; the page is the only thing meant to hold your eye. Aurora appears
+   exactly twice — the current item in the tree, and the one "new" action.
+   --------------------------------------------------------------------------- */
+
+.notes {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.notes-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+/* --- Out of space ----------------------------------------------------------
+   The one alarming thing this tool is allowed to say, and it has earned it: a
+   notes app that silently stops saving is worse than one that shouts. */
+
+.notes-alarm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s-8);
+  padding: var(--s-12) var(--s-24);
+  border-bottom: 1px solid var(--flare);
+  background: rgb(232 121 107 / 0.1);
+  font-size: var(--text-label);
+  line-height: 1.5;
+  color: var(--starlight);
+}
+
+.notes-alarm .text-button {
+  margin-left: auto;
+  color: var(--flare);
+}
+
+/* --- The tree --------------------------------------------------------------
+   A map, not a feature. One shade off the canvas, hairline edge, nothing in it
+   competing with the writing. */
+
+.tree {
+  flex: 0 0 264px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--horizon);
+  background: var(--deep-space);
+}
+
+.tree-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s-12);
+  padding: var(--s-16) var(--s-16) var(--s-12);
+}
+
+.tree-title {
+  flex: 1;
+  font-size: var(--text-label);
+  font-weight: 500;
+  color: var(--moonlight);
+}
+
+.tree-new {
+  min-height: 32px;
+  padding: 0 var(--s-12);
+  font-size: var(--text-label);
+}
+
+.tree-empty {
+  margin: 0;
+  padding: 0 var(--s-16) var(--s-16);
+  font-size: var(--text-caption);
+  color: var(--comet);
+}
+
+.tree-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The outer list scrolls; the note beneath it does not go anywhere. */
+.tree > .tree-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 var(--s-8) var(--s-16);
+}
+
+.tree-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  /* Depth is drawn as indentation rather than nested boxes, so a page eight
+     levels down is still a row and not a stack of frames. */
+  padding-left: calc(var(--depth) * var(--s-16));
+  border-radius: var(--s-8);
+  transition: background var(--dur-fast) var(--ease-inout);
+}
+
+.tree-row:hover {
+  background: var(--nebula);
+}
+
+.tree-row[data-current="true"] {
+  background: var(--nebula);
+}
+
+.tree-row[data-current="true"] .tree-label,
+.tree-row[data-current="true"] .tree-icon {
+  color: var(--aurora);
+}
+
+.tree-twist {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--comet);
+  cursor: pointer;
+}
+
+.tree-twist:disabled {
+  cursor: default;
+}
+
+.tree-icon {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  color: var(--comet);
+}
+
+.tree-label {
+  flex: 1;
+  min-width: 0;
+  padding: var(--s-8) var(--s-4);
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: var(--text-label);
+  color: var(--starlight);
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.tree-rename {
+  flex: 1;
+  min-width: 0;
+  height: 28px;
+  padding: 0 var(--s-8);
+  border: 1px solid var(--aurora);
+  border-radius: var(--s-4);
+  background: var(--void);
+  color: var(--starlight);
+  font: inherit;
+  font-size: var(--text-label);
+}
+
+.tree-rename:focus-visible {
+  outline: none;
+}
+
+.tree-row-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 2px;
+  padding-right: var(--s-4);
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-inout);
+}
+
+.tree-row:hover .tree-row-actions,
+.tree-row:focus-within .tree-row-actions {
+  opacity: 1;
+}
+
+@media (pointer: coarse) {
+  .tree-row-actions {
+    opacity: 1;
+  }
+}
+
+.icon-button--tiny {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--s-4);
+}
+
+/* --- Export, and the truth about where these live --------------------------
+   Pinned to the bottom of the tree rather than tucked into a menu. It is the
+   only real safety net this tool has, so it does not get to be hard to find. */
+
+.tree-foot {
+  flex: 0 0 auto;
+  padding: var(--s-12) var(--s-16) var(--s-16);
+  border-top: 1px solid var(--horizon);
+}
+
+.tree-note {
+  margin: 0 0 var(--s-8);
+  font-size: var(--text-caption);
+  line-height: 1.5;
+  color: var(--moonlight);
+}
+
+.tree-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-4) var(--s-16);
+}
+
+.tree-actions .text-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-4);
+  font-size: var(--text-caption);
+}
+
+.tree-file {
+  display: none;
+}
+
+/* --- The canvas ------------------------------------------------------------ */
+
+.canvas-wrap {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.canvas {
+  max-width: 68ch;
+  margin: 0 auto;
+  padding: var(--s-48) var(--s-32) var(--s-96);
+}
+
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-4);
+  margin-bottom: var(--s-8);
+  font-size: var(--text-caption);
+  color: var(--comet);
+}
+
+.crumb {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.crumb:hover {
+  color: var(--moonlight);
+}
+
+.crumb + .crumb::before {
+  content: "/";
+  margin-right: var(--s-4);
+  color: var(--horizon);
+}
+
+.page-head-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-16);
+}
+
+/* The title is the rename. No pencil, no dialog — you click it and type. */
+.page-title {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  margin: 0 0 var(--s-24);
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: var(--font-display);
+  font-size: var(--text-display-m);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--starlight);
+}
+
+.page-title:focus-visible {
+  outline: none;
+}
+
+.page-title::placeholder {
+  color: var(--horizon);
+}
+
+.page-copy {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-4);
+  font-size: var(--text-caption);
+  color: var(--moonlight);
+}
+
+/* --- Blocks ----------------------------------------------------------------
+   One textarea a block. They carry their real typographic weight while you
+   type, so the page reads as what it is rather than as its source. */
+
+.block {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-8);
+}
+
+.block-input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--starlight);
+  font: inherit;
+  resize: none;
+  overflow: hidden;
+}
+
+.block-input:focus-visible {
+  outline: none;
+}
+
+.block-input::placeholder {
+  color: var(--comet);
+}
+
+.block[data-type="p"] .block-input {
+  padding: var(--s-4) 0;
+  font-size: var(--text-body-l);
+  line-height: 1.7;
+}
+
+.block[data-type="h1"] .block-input {
+  margin-top: var(--s-24);
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.block[data-type="h2"] .block-input {
+  margin-top: var(--s-16);
+  font-family: var(--font-display);
+  font-size: 1.3125rem;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.block[data-type="li"] {
+  padding-left: var(--s-8);
+}
+
+.block[data-type="li"] .block-input {
+  padding: var(--s-4) 0;
+  font-size: var(--text-body-l);
+  line-height: 1.7;
+}
+
+.block-bullet {
+  flex: 0 0 auto;
+  width: 5px;
+  height: 5px;
+  /* Sits on the first line's baseline rather than the top of the box, so a
+     bullet that wraps to three lines still points at the first. */
+  margin-top: calc(0.85rem + var(--s-4));
+  border-radius: 50%;
+  background: var(--comet);
+}
+
+/* --- A notebook's shelf ----------------------------------------------------- */
+
+.shelf-empty {
+  margin: 0 0 var(--s-16);
+  font-size: var(--text-body-l);
+  color: var(--moonlight);
+}
+
+.shelf-list {
+  margin: 0 0 var(--s-16);
+  padding: 0;
+  list-style: none;
+}
+
+.shelf-item {
+  display: flex;
+  align-items: center;
+  gap: var(--s-12);
+  width: 100%;
+  padding: var(--s-12) var(--s-8);
+  border: none;
+  border-radius: var(--s-8);
+  background: none;
+  font: inherit;
+  font-size: var(--text-body-l);
+  color: var(--starlight);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-inout);
+}
+
+.shelf-item:hover {
+  background: var(--nebula);
+}
+
+.shelf-item svg {
+  flex: 0 0 auto;
+  color: var(--comet);
+}
+
+.shelf-new {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-4);
+}
+
+/* --- Welcome ---------------------------------------------------------------- */
+
+.welcome {
+  padding-top: var(--s-96);
+}
+
+.welcome-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-display-m);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--starlight);
+}
+
+.welcome-body {
+  margin: var(--s-16) 0 0;
+  max-width: 48ch;
+  font-size: var(--text-body-l);
+  line-height: 1.6;
+  color: var(--moonlight);
+}
+
+.welcome-new {
+  margin-top: var(--s-32);
+}
+
+/* --- Dialogs ---------------------------------------------------------------- */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s-24);
+  background: rgb(10 12 18 / 0.6);
+  animation: scrim-in var(--dur-mid) var(--ease-out);
+}
+
+.dialog {
+  width: 100%;
+  max-width: 420px;
+  padding: var(--s-24);
+  border: 1px solid var(--horizon);
+  border-radius: var(--r-card);
+  background: var(--dust);
+}
+
+.dialog-title {
+  margin: 0;
+  font-size: var(--text-title);
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--starlight);
+}
+
+.dialog-body {
+  margin: var(--s-12) 0 var(--s-24);
+  font-size: var(--text-body);
+  line-height: 1.6;
+  color: var(--moonlight);
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--s-8);
+}
+
+.button--danger {
+  background: transparent;
+  border-color: var(--flare);
+  color: var(--flare);
+}
+
+.button--danger:hover {
+  background: rgb(232 121 107 / 0.12);
+}
+
+.notes-undo {
+  position: absolute;
+  left: 50%;
+  bottom: var(--s-24);
+  z-index: 10;
+  translate: -50% 0;
+  min-width: 320px;
+  max-width: min(520px, calc(100vw - var(--s-48)));
+  margin: 0;
+}
+
+/* --- Mobile: the tree and the page take turns ------------------------------
+   A 264px rail beside a 68ch measure does not fit a phone, so the tool shows
+   the tree until a page is chosen and the page after that. */
+
+@media (max-width: 860px) {
+  .notes-body {
+    flex-direction: column;
+  }
+
+  .tree {
+    flex: 1;
+    min-height: 0;
+    border-right: none;
+    border-bottom: 1px solid var(--horizon);
+  }
+
+  .canvas-wrap {
+    display: none;
+  }
+
+  .canvas-wrap[data-open="true"] {
+    display: block;
+    flex: 1;
+  }
+
+  /* Once a page is open the tree gives up most of the screen to it, and the
+     breadcrumb walks back up. Without :has support both simply share the
+     column, which is a worse layout but not a broken one. */
+  .notes-body:has(.canvas-wrap[data-open="true"]) .tree {
+    flex: 0 0 auto;
+    max-height: 38vh;
+  }
+
+  .canvas {
+    padding: var(--s-24) var(--s-16) var(--s-64);
+  }
+
+  .page-title {
+    font-size: var(--text-title);
+    font-family: var(--font-ui);
+    font-weight: 600;
+  }
+
+  .page-head-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--s-4);
+  }
+}

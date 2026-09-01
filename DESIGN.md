@@ -376,6 +376,18 @@ The editor is genuine rich text: **headings (a couple of levels), paragraphs, an
 
 Visually Notes leans slightly toward the calmer, more spacious end of the product lane — it's a reading and writing surface, so its measure stays within ~70 characters (section 9), its type is comfortable (Body L for note content), and its chrome is minimal. Still product, not brand: no performance, just a quiet place to write. The tree, the page, and the editor are all Deep Space / Nebula surfaces with Horizon dividers; Aurora marks only the current page in the tree and the single primary "new" action.
 
+**As built** (2026-08-31), the two decisions that shaped everything else:
+
+- **The editor is built, not borrowed — one controlled `<textarea>` per block, no `contenteditable`.** Every formatting requirement above is block-level; none of them asks for inline bold, italic, or links. That distinction is the whole thing: inline marks are what force `contenteditable` and therefore a library, and block-level formatting needs no selection API at all. Markdown-style shortcuts drive it, which this section already sanctions.
+
+  The reason isn't bundle size, it's durability. A ProseMirror or Lexical document is opaque JSON coupled to that library's schema, and Orbit has no backend, no migrations, and no way to reach anyone's data to fix it. A four-type block array is a format we own and can always read back out. For the one tool whose safety story is "export it yourself", owning the format is worth more than editor fidelity.
+
+  The costs, accepted: no inline marks, selection cannot cross blocks (so every page carries a visible "Copy as Markdown"), and undo is per-block rather than per-document.
+
+- **Deleting a node with pages inside it asks first**, then still offers the undo. This departs from the undo-over-confirm rule the rest of the product follows, and it should: section 4 requires confirmation on anything irreversible, and nine seconds is not a real reprieve for a notebook holding a month of writing. A bare page still goes immediately with undo, exactly like everything else.
+
+Export is two files answering two questions. **JSON** is canonical — the whole tree and every body, and the only thing import reads. **Markdown** is the readable copy: every page under its full path on a `>` line, which is the one line-start a page body can never produce. Neither rewrites a character of what was typed; `**bold**` is four asterisks and a word here, and it leaves as it arrived.
+
 ### Cut: Skills
 
 Considered and cut (2026-08-31). A hand-maintained list of "skills I have" is a static inventory that doesn't connect to the practice — it rewards no real progress and risks becoming dead weight (Principle 2). If a sense of "what am I getting better at" is wanted later, it should *emerge* from where focus was actually spent (goals and dailies invested in over time), not from a list the person curates. Not on the roadmap.
